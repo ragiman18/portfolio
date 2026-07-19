@@ -25,7 +25,7 @@
     <a class="backlink" href="index.html">&larr; All projects</a>
 
     <p class="eyebrow">Luminary Cloud · CFD</p>
-    <h1>Grid-Convergence Study &mdash; SAE Notchback</h1>
+    <h1>Grid-Convergence Study: SAE Notchback</h1>
 
     <div class="specblock">
       <dl>
@@ -41,7 +41,7 @@
         <dt>Result</dt>
         <dd class="result">C<sub>D</sub> converged from <b>0.229</b> at 2M cells toward
             <b>0.208</b> at 189M cells under uniform refinement. An adaptively meshed run at
-            25M cells reached C<sub>D</sub> = 0.212 &mdash; comparable to the 63M uniform-mesh
+            25M cells reached C<sub>D</sub> = 0.212, comparable to the 63M uniform-mesh
             result at roughly 40% of the cell count. y+ held near 1.3 across every mesh.</dd>
       </dl>
     </div>
@@ -53,10 +53,10 @@
       resolution, and there's no way to tell them apart without a convergence study. This study
       refines the volume mesh across nearly two orders of magnitude in cell count to find where
       the predicted drag settles, and checks whether Luminary's adaptive meshing can reach that
-      settled value with far fewer cells than uniform refinement requires.
+      settled value with fewer cells than uniform refinement requires.
     </p>
     <p>
-      The geometry is the <b>SAE 20-Degree Notchback Automotive Reference Model</b>, a fully
+      The geometry is the <b>SAE 20-Degree Notchback Automotive Reference Model</b>, a
       public benchmark used for automotive aerodynamics validation.
     </p>
 
@@ -100,7 +100,7 @@
     <p>
       Under uniform refinement, C<sub>D</sub> falls steadily as cell count increases and begins
       to flatten toward roughly 0.208 at the finest mesh. y+ stays near 1.3 throughout,
-      confirming the near-wall mesh was consistent across all cases &mdash; the drag trend is a
+      confirming the near-wall mesh was consistent across all cases. The drag trend is a
       refinement effect, not a byproduct of changing wall resolution.
     </p>
 
@@ -120,7 +120,7 @@
 
     <p>
       The adaptive run is the more useful result. At 25M cells it predicts C<sub>D</sub> = 0.212,
-      as close to the converged value as the 63M uniform mesh &mdash; reaching comparable
+      as close to the converged value as the 63M uniform mesh, reaching comparable
       accuracy at roughly 40% of the cells by placing resolution where the solution needed it
       rather than refining everywhere uniformly.
     </p>
@@ -138,8 +138,7 @@
     <h2>Honest assessment</h2>
     <div class="assessment">
       <p>
-        The drag is still drifting slightly at the finest mesh &mdash; 0.214 at 63M to 0.208 at
-        189M &mdash; so the solution is not fully in the asymptotic range, and the fitted trend
+        The drag is still drifting slightly at the finest mesh (0.214 at 63M to 0.208 at 189M), so the solution is not fully in the asymptotic range, and the fitted trend
         suggests C<sub>D</sub> would settle a little lower with further refinement. A formal
         Richardson extrapolation and grid-convergence index (GCI) would quantify the remaining
         discretization error and give a bracketed converged value; that's the next step this
