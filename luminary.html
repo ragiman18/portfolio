@@ -82,18 +82,24 @@
       limits inside a refinement box around the vehicle. A sixth run used Luminary's adaptive
       meshing to concentrate cells where the solution needed them, at a total of 25M cells.
     </p>
+    <p>
+      Convergence is measured against characteristic cell edge length rather than raw cell
+      count, since edge length is the quantity that goes to zero as the mesh is refined and is
+      the natural variable for grid-convergence analysis. For a fixed domain, edge length scales
+      as h = (1 / cells)<sup>1/3</sup>, giving the values listed in the table above.
+    </p>
 
     <h2>Results</h2>
     <table>
       <thead>
-        <tr><th>Mesh</th><th>Cells</th><th>Drag (N)</th><th>C<sub>D</sub></th><th>y+</th></tr>
+        <tr><th>Mesh</th><th>Cells</th><th>Edge length</th><th>Drag (N)</th><th>C<sub>D</sub></th><th>y+</th></tr>
       </thead>
       <tbody>
-        <tr><td>Coarse</td><td>2M</td><td>14.046</td><td>0.229</td><td>1.307</td></tr>
-        <tr><td>&mdash;</td><td>10M</td><td>13.157</td><td>0.215</td><td>1.312</td></tr>
-        <tr class="highlight"><td>Adaptive (LMA)</td><td>25M</td><td>12.966</td><td>0.212</td><td>1.331</td></tr>
-        <tr><td>&mdash;</td><td>63M</td><td>12.899</td><td>0.214</td><td>1.333</td></tr>
-        <tr><td>Fine</td><td>189M</td><td>12.722</td><td>0.208</td><td>1.336</td></tr>
+        <tr><td>Coarse</td><td>2M</td><td>0.00794</td><td>14.046</td><td>0.229</td><td>1.307</td></tr>
+        <tr><td>&middot;</td><td>10M</td><td>0.00464</td><td>13.157</td><td>0.215</td><td>1.312</td></tr>
+        <tr class="highlight"><td>Adaptive (LMA)</td><td>25M</td><td>0.00342</td><td>12.966</td><td>0.212</td><td>1.331</td></tr>
+        <tr><td>&middot;</td><td>63M</td><td>0.00251</td><td>12.899</td><td>0.214</td><td>1.333</td></tr>
+        <tr><td>Fine</td><td>189M</td><td>0.00174</td><td>12.722</td><td>0.208</td><td>1.336</td></tr>
       </tbody>
     </table>
 
@@ -105,17 +111,19 @@
     </p>
 
     <figure>
-      <div class="fig-placeholder">[ figure: C_D vs. cell count &mdash; recreate clean, flag the LMA point ]</div>
-      <figcaption><b>Fig. 1</b> &mdash; Drag coefficient vs. cell count. Uniform-mesh points
-        trend toward a converged value as cell count increases; the adaptive-mesh point (25M)
-        lands on the converged trend at a fraction of the cells.</figcaption>
+      <img src="images/cd_vs_edge.png" alt="Drag coefficient vs edge length">
+      <figcaption><b>Fig. 1.</b> Drag coefficient vs. cell edge length, h = (1/cells)<sup>1/3</sup>.
+        Uniform-mesh points (red) trend toward a converged value as edge length shrinks; a linear
+        fit through them extrapolates to C<sub>D</sub> &asymp; 0.204 at zero spacing (approximate,
+        not a formal GCI result). The adaptive-mesh point (green, 25M) sits off the uniform curve
+        near the converged region.</figcaption>
     </figure>
-
+    
     <figure>
-      <div class="fig-placeholder">[ figure: y+ vs. cell count ]</div>
-      <figcaption><b>Fig. 2</b> &mdash; Wall y+ vs. cell count. Near-wall resolution held near
-        1.3 across all meshes, isolating volume-mesh refinement as the only variable behind the
-        drag trend.</figcaption>
+      <img src="images/yplus_vs_edge.png" alt="Wall y+ vs edge length">
+      <figcaption><b>Fig. 2.</b> Wall y+ vs. cell edge length. Near-wall resolution held near 1.3
+        across every mesh, isolating volume-mesh refinement as the only variable behind the drag
+        trend.</figcaption>
     </figure>
 
     <p>
@@ -126,13 +134,10 @@
     </p>
 
     <figure>
-      <div class="fig-placeholder">[ figure: refinement-box mesh around vehicle ]</div>
-      <figcaption><b>Fig. 3</b> &mdash; Volume mesh with the refinement box around the vehicle.</figcaption>
-    </figure>
-
-    <figure>
-      <div class="fig-placeholder">[ figure: velocity or pressure contour on notchback ]</div>
-      <figcaption><b>Fig. 4</b> &mdash; Flow field around the notchback.</figcaption>
+      <img src="images/notchback_10mcv.png" alt="Velocity field, y=0 slice, 10M-cell mesh">
+      <figcaption><b>Fig. 3.</b> Velocity-magnitude field on the y = 0 slice (10M-cell mesh).
+        Flow decelerates to zero at the forward stagnation point and accelerates over the roof and
+        around the wheels.</figcaption>
     </figure>
 
     <h2>Honest assessment</h2>
