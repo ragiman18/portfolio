@@ -52,7 +52,7 @@
       number from a single mesh could be a real prediction or an artifact of insufficient
       resolution, and there's no way to tell them apart without a convergence study. This study
       refines the volume mesh across nearly two orders of magnitude in cell count to find where
-      the predicted drag settles, and checks whether Luminary's adaptive meshing can reach that
+      the predicted drag settles, and checks whether Luminary's adaptive meshing (LMA) can reach that
       settled value with fewer cells than uniform refinement requires.
     </p>
     <p>
@@ -86,7 +86,7 @@
       Convergence is measured against characteristic cell edge length rather than raw cell
       count, since edge length is the quantity that goes to zero as the mesh is refined and is
       the natural variable for grid-convergence analysis. For a fixed domain, edge length scales
-      as h = (1 / cells)<sup>1/3</sup>, giving the values listed in the table above.
+      as h = (1 / cells)<sup>1/3</sup>, giving the values listed in the table below.
     </p>
 
     <h2>Results</h2>
@@ -136,18 +136,26 @@
     <figure>
       <img src="images/notchback_10mcv.png" alt="Velocity field, y=0 slice, 10M-cell mesh">
       <figcaption><b>Fig. 3.</b> Velocity-magnitude field on the y = 0 slice (10M-cell mesh).
-        Flow decelerates to zero at the forward stagnation point and accelerates over the roof, with a large separation region down the back and behind the geometry.</figcaption>
+        Flow decelerates to zero at the forward stagnation point and accelerates over the roof, with a small separation region down the back.</figcaption>
     </figure>
 
-    <h2>Honest assessment</h2>
+    <h2>Conclusion</h2>
+    <p>
+      Predicted drag converges under mesh refinement toward roughly 0.208, and holding the
+      near-wall mesh fixed kept y+ near 1.3 across every case, so the drag trend reflects
+      just the volume mesh refinement. The adaptive-mesh run reached comparable accuracy to the 63M
+      uniform mesh at 25M cells, showing that concentrating resolution where the solution needs it
+      recovers most of the benefit of uniform refinement at a fraction of the cell count.
+    </p>
     <div class="assessment">
       <p>
-        The drag is still drifting slightly at the finest mesh (0.214 at 63M to 0.208 at 189M), so the solution is not fully in the asymptotic range, and the fitted trend
-        suggests C<sub>D</sub> would settle a little lower with further refinement. A formal
+        The result is not fully converged. Drag is still drifting at the finest mesh (0.214 at 63M
+        to 0.208 at 189M), so the solution is not yet in the asymptotic range, and the fitted trend
+        suggests C<sub>D</sub> would settle slightly lower with further refinement. A formal
         Richardson extrapolation and grid-convergence index (GCI) would quantify the remaining
-        discretization error and give a bracketed converged value; that's the next step this
-        study points to. The adaptive-meshing comparison is an accuracy-at-lower-cost result,
-        not a claim that 25M cells reproduces the exact converged solution.
+        discretization error and give a bracketed converged value; that is the next step this study
+        points to. The adaptive-meshing comparison is an accuracy-at-lower-cost result, not a claim
+        that 25M cells reproduces the exact converged solution.
       </p>
     </div>
   </main>
