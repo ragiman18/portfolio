@@ -81,6 +81,14 @@
       force coefficients, which resolve into lift.
     </p>
     <p>
+      Two similarly named ideas do different jobs here. The Kutta condition is a boundary
+      condition applied while solving, forcing smooth flow off the trailing edge and fixes the
+      otherwise undetermined circulation. The Kutta&ndash;Joukowski theorem is a result applied
+      afterward, relating total circulation to lift through L' = &rho;V<sub>&infin;</sub>&Gamma;.
+      The first closes the system, and the second is one way to extract lift once the system is
+      solved.
+    </p>
+    <p>
       The solver was written in Python, adapting the numerical formulation from JoshTheEngineer's
       open-source (MIT-licensed) panel-method work, and then verified independently against XFOIL
       and against the Kutta&ndash;Joukowski theorem.
@@ -108,12 +116,15 @@
     </figure>
 
     <p>
-      Lift was then checked three ways. The panel method integrates surface pressure to get
-      C<sub>L</sub> = 0.251. Applying the Kutta&ndash;Joukowski theorem to the total circulation
-      from the same solution gives 0.253. XFOIL reports 0.256. Two independent routes through the
-      solver's own output and one external tool all land within about 2% of each other, which is a
-      stronger check than any single comparison.
+      Lift was then checked two ways. Integrating the surface pressure distribution gives
+      C<sub>L</sub> = 0.251, while applying the Kutta&ndash;Joukowski theorem to the total
+      circulation from the same solution gives 0.253. Both methods start from the same solved
+      vortex strengths, so their agreement to within 1% is an internal consistency check. It
+      confirms the pressure integration and force resolution are consistent with the circulation
+      solution rather than providing a second opinion on it. XFOIL, at 0.256, supplies the
+      external comparison, and all three land within about 2%.
     </p>
+    
     <p>
       The result is also physically sensible on its own terms. All three values are taken at zero
       angle of attack, where a cambered airfoil like the NACA 2412 still generates lift, so a
