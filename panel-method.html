@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Source &amp; Vortex Panel-Method Solver — Raghav Mansharamani</title>
+  <title>Panel-Method Solver | Raghav Mansharamani</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,9 +23,153 @@
 
   <main>
     <a class="backlink" href="index.html">&larr; All projects</a>
+
     <p class="eyebrow">Python · Potential Flow</p>
-    <h1>Source &amp; Vortex Panel-Method Solver</h1>
-    <div class="stub">Content coming soon.</div>
+    <h1>Source and Vortex Panel-Method Solver</h1>
+
+    <div class="specblock">
+      <dl>
+        <dt>Objective</dt>
+        <dd>Implement a source and vortex panel method from potential-flow theory to predict
+            the pressure distribution and lift on an airfoil, then verify the solver against
+            an established reference.</dd>
+        <dt>Tools</dt>
+        <dd>Python (NumPy, Matplotlib).</dd>
+        <dt>Role</dt>
+        <dd>Implemented the solver, ran the cases, and carried out the verification.</dd>
+        <dt>Result</dt>
+        <dd class="result">Pressure distribution on a NACA 2412 matched XFOIL to within
+            <b>~5%</b>. Lift coefficient agreed across three independent methods: vortex panel
+            <b>0.251</b>, Kutta&ndash;Joukowski <b>0.253</b>, XFOIL <b>0.256</b>.</dd>
+      </dl>
+    </div>
+
+    <h2>Problem</h2>
+    <p>
+      Panel methods are how you get fast pressure and lift estimates on an airfoil before
+      committing to full CFD. They solve potential flow around the real surface geometry, which
+      makes them far cheaper than a Navier-Stokes solve while still capturing the pressure
+      distribution that sets lift.
+    </p>
+    <p>
+      The goal here was to build one from the governing equations rather than drive an existing
+      tool, and then check the result against a trusted reference. Working through the
+      implementation means understanding what a commercial solver is doing internally instead of
+      treating it as a black box, and verifying the output is what turns a working script into a
+      result worth trusting. The test case is a NACA 2412 airfoil.
+    </p>
+
+    <h2>Method</h2>
+    <p>
+      The method assumes potential flow: steady, incompressible, inviscid, and irrotational.
+      Under those assumptions the velocity field is the gradient of a scalar potential, and the
+      flow around the airfoil can be built by superposing elementary solutions placed on the
+      surface.
+    </p>
+    <p>
+      The airfoil surface is discretized into straight-line panels using coordinates from the
+      UIUC airfoil database, with a control point at the center of each panel. Source panels
+      represent the non-lifting thickness effect, and vortex panels introduce circulation, which
+      is what produces lift. Enforcing zero normal velocity at every control point gives a linear
+      system for the unknown panel strengths, which is solved directly. For the vortex
+      formulation, one equation is replaced by the Kutta condition, forcing the flow to leave the
+      trailing edge smoothly and closing the circulation problem.
+    </p>
+    <p>
+      Once the panel strengths are known, the tangential velocity at each control point gives the
+      pressure coefficient, and integrating pressure over the surface gives the normal and axial
+      force coefficients, which resolve into lift.
+    </p>
+    <p>
+      The solver was written in Python, adapting the numerical formulation from JoshTheEngineer's
+      open-source (MIT-licensed) panel-method work, and then verified independently against XFOIL
+      and against the Kutta&ndash;Joukowski theorem.
+    </p>
+
+    <figure>
+      <img src="images/panel_geometry.png" alt="Airfoil discretized into panels with control points and normals">
+      <figcaption><b>Fig. 1.</b> NACA 2412 surface discretized into panels, showing control
+        points and panel normal vectors. The no-penetration condition is enforced at each control
+        point.</figcaption>
+    </figure>
+
+    <h2>Results</h2>
+    <p>
+      The pressure distribution from the vortex panel method matches XFOIL closely across both
+      surfaces, agreeing to within roughly 5%. Since XFOIL is an independently developed and
+      widely used tool, that agreement is evidence the implementation is correct rather than
+      merely self-consistent.
+    </p>
+
+    <figure>
+      <img src="images/panel_cp_xfoil.png" alt="Pressure coefficient vs chord, panel method compared with XFOIL">
+      <figcaption><b>Fig. 2.</b> Pressure coefficient along the chord, panel method compared
+        against XFOIL for the upper and lower surfaces.</figcaption>
+    </figure>
+
+    <p>
+      Lift was then checked three ways. The panel method integrates surface pressure to get
+      C<sub>L</sub> = 0.251. Applying the Kutta&ndash;Joukowski theorem to the total circulation
+      from the same solution gives 0.253. XFOIL reports 0.256. Two independent routes through the
+      solver's own output and one external tool all land within about 2% of each other, which is a
+      stronger check than any single comparison.
+    </p>
+    <p>
+      The result is also physically sensible on its own terms. All three values are taken at zero
+      angle of attack, where a cambered airfoil like the NACA 2412 should still generate lift, and
+      the predicted C<sub>L</sub> near 0.25 is consistent with what thin airfoil theory gives for
+      its camber. A symmetric airfoil under the same conditions would produce no lift at all.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Method</th><th>C<sub>L</sub></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Vortex panel method</td><td>0.251</td></tr>
+        <tr><td>Kutta&ndash;Joukowski</td><td>0.253</td></tr>
+        <tr><td>XFOIL</td><td>0.256</td></tr>
+      </tbody>
+    </table>
+    <p class="muted" style="font-family:var(--mono);font-size:13px">
+      All values at zero angle of attack.
+    </p>
+
+    <p>
+      The solver also produces the full flow field, not just surface quantities. Streamlines and
+      the pressure field show the expected behavior: flow accelerating over the upper surface with
+      the corresponding low-pressure region, and stagnation near the leading edge.
+    </p>
+
+    <figure>
+      <img src="images/panel_streamlines.png" alt="Streamlines around the NACA 2412 airfoil">
+      <figcaption><b>Fig. 3.</b> Streamlines around the NACA 2412 at zero angle of attack,
+        computed from the vortex panel solution.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/panel_pressure_contour.png" alt="Pressure coefficient contour around the airfoil">
+      <figcaption><b>Fig. 4.</b> Pressure coefficient field around the airfoil at zero angle of
+        attack. The low-pressure region over the upper surface is what produces lift.</figcaption>
+    </figure>
+
+    <h2>Conclusion</h2>
+    <p>
+      A panel-method solver built from potential-flow theory reproduces an established reference
+      to within a few percent, verified two ways: pressure distribution against XFOIL, and lift
+      coefficient against both XFOIL and the Kutta&ndash;Joukowski theorem. Agreement across
+      independent formulations is what makes the result credible rather than just plausible.
+    </p>
+    <div class="assessment">
+      <p>
+        The method is inviscid by construction, so it cannot predict viscous drag, boundary-layer
+        development, flow separation, or stall. It is valid at low angle of attack and small
+        camber, and accuracy degrades as those assumptions break down. The comparison against
+        XFOIL is also a comparison against another potential-flow-based tool rather than against
+        experiment, so it verifies the implementation rather than validating the physics.
+        Validation would require wind-tunnel data or a viscous solver.
+      </p>
+    </div>
   </main>
 
   <footer>
