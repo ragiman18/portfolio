@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Composite Sandwich FEA — Raghav Mansharamani</title>
+  <title>Composite Sandwich FEA | Raghav Mansharamani</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,9 +23,161 @@
 
   <main>
     <a class="backlink" href="index.html">&larr; All projects</a>
-    <p class="eyebrow">ANSYS ACP / Mechanical · FEA</p>
-    <h1>Composite Sandwich FEA</h1>
-    <div class="stub">Content coming soon.</div>
+
+    <p class="eyebrow">ANSYS ACP &amp; Mechanical · FEA</p>
+    <h1>Composite Sandwich FEA: Validating a Three-Point Bend Test</h1>
+
+    <div class="specblock">
+      <dl>
+        <dt>Objective</dt>
+        <dd>Model a three-point bend test of a 3D-printed carbon fiber sandwich panel and see
+            whether FEA matches the measured peak load and failure locations.</dd>
+        <dt>Tools</dt>
+        <dd>ANSYS ACP, ANSYS Mechanical, Siemens NX.</dd>
+        <dt>Role</dt>
+        <dd>Built the model and ran the analysis. The physical tests were done earlier in the
+            lab, so the experimental data was already set before I started modeling.</dd>
+        <dt>Result</dt>
+        <dd class="result">FEA predicted <b>5.6 kN</b> at 1.66 mm deflection against a measured
+            <b>5.4 kN</b> at 2.5 mm, within <b>3.7%</b> on peak load. Tsai-Wu failure locations
+            matched the physical specimen.</dd>
+      </dl>
+    </div>
+
+    <h2>Problem</h2>
+    <p>
+      Composite sandwich panels fail in ways that are hard to predict by hand, like delamination
+      at the core-skin interface and local ply failure. Physical testing shows this behavior but
+      destroys a specimen every time, which makes trying new core designs slow and expensive.
+    </p>
+    <p>
+      If FEA can match a test that has already been run, it can be used to screen new core
+      geometries without printing and breaking a panel for each one. This project models a
+      three-point bend test of a sandwich panel with a sinusoidal core, printed on a CF3D
+      continuous fiber printer, and compares the results to test data collected earlier in the
+      lab. Since that data existed before I built the model, I could not tune the model to match
+      it.
+    </p>
+
+    <h2>Method</h2>
+
+    <h3>Geometry</h3>
+    <p>
+      The core, skins, and bend test pins were modeled in NX as surfaces, with composite
+      thickness added later in ACP. The surfaces were offset vertically by the exact ply
+      thickness that would be applied, so the finished solid model has the parts in contact
+      instead of overlapping.
+    </p>
+    <p>
+      The core was scaled to the tested specimen: 304.8 mm long, 254 mm support span, 25.4 mm
+      steel pins. The original CAD has a gap between the sinusoidal and straight core sections,
+      but the printer tolerance means those parts touch in the real panel, so the gap was reduced
+      to 0.1 mm. That is close enough for ANSYS to treat them as in contact, which matters for
+      capturing debonding between them.
+    </p>
+
+    <h3>Layup</h3>
+    <p>
+      The layup was defined in ACP with the top skin, bottom skin, and core in separate modules
+      so each could have its own coordinate system and fiber direction. Both skins use 7 plies at
+      0 degrees, 0.225 mm per ply, matching the printer, for 1.575 mm total. The core is 58 plies
+      at 13.05 mm.
+    </p>
+    <p>
+      The core fiber direction follows the sinusoid instead of one global direction. To set this
+      up, named selections were made for each sinusoidal edge in Mechanical, then used as edge
+      sets in ACP to define the reference direction along the curve. Ply properties came from
+      Toray T-1100 12K tow data, and the cohesive interface used resin properties from published
+      data on the same printing process.
+    </p>
+
+    <h3>Contacts and loading</h3>
+    <p>
+      The core-to-skin interface is bonded with contact debonding using a bilinear cohesive zone
+      model, so delamination can actually happen instead of being ruled out from the start. It
+      uses a pure penalty formulation, which converges more easily but allows some
+      interpenetration.
+    </p>
+    <p>
+      The pins use frictionless contact so the fixture does not add stiffness the real test would
+      not have, with an augmented Lagrange formulation for better accuracy between the two
+      different materials.
+    </p>
+    <p>
+      Load is applied as a 1.66 mm displacement on the top pin with the support pins fixed. Early
+      runs showed the panel sliding sideways out of the fixture, which is not physical, so I added
+      a second remote displacement to constrain lateral motion while still letting the panel bend
+      freely.
+    </p>
+
+    <figure>
+      <img src="images/composite_solid_model.png" alt="Solid model of sinusoidal core sandwich panel with bend test pins">
+      <figcaption><b>Fig. 1.</b> Solid model of the sandwich panel and bend test fixture after
+        ply thicknesses are applied in ACP.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/composite_fiber_direction.png" alt="Fiber direction following the sinusoidal core geometry">
+      <figcaption><b>Fig. 2.</b> Core fiber direction following the sinusoid, defined from edge
+        sets built on named selections.</figcaption>
+    </figure>
+
+    <h2>Results</h2>
+    <p>
+      The predicted deformation is smooth and symmetric, with the maximum deflection under the
+      loading pin at mid-span and near zero at the supports. There is no noticeable twisting out
+      of the bending plane, which means the core-skin bond holds up to peak load.
+    </p>
+
+    <figure>
+      <img src="images/composite_deformation.png" alt="Total deformation contour of the sandwich panel">
+      <figcaption><b>Fig. 3.</b> Total deformation at peak load, with 1.66 mm maximum deflection
+        under the loading pin.</figcaption>
+    </figure>
+
+    <p>
+      The model stays linear up to 1.66 mm of deflection and peaks at 5.6 kN before the reaction
+      force drops off. The physical test peaked at 5.4 kN at 2.5 mm. Peak load agrees within
+      3.7%, but the model gets there 0.84 mm earlier, so the simulated panel is stiffer than the
+      real one.
+    </p>
+
+    <figure>
+      <img src="images/composite_load_displacement.png" alt="Load displacement curves from FEA and physical testing">
+      <figcaption><b>Fig. 4.</b> Load vs. displacement, FEA compared with the physical test.
+        Peak load agrees within 3.7%, but the simulated response is stiffer and peaks earlier.</figcaption>
+    </figure>
+
+    <p>
+      Failure was checked with the Tsai-Wu criterion, which predicts failure once its value
+      reaches 1. The model peaks at 1.2, with failure at the pin contacts and where the
+      sinusoidal core sections touch each other or the skins. These are the same locations where
+      the physical specimen failed, including on the bottom surface near mid-span.
+    </p>
+
+    <figure>
+      <img src="images/composite_tsai_wu.png" alt="Tsai-Wu failure criterion contour, top and bottom views">
+      <figcaption><b>Fig. 5.</b> Tsai-Wu failure criterion on the top and bottom surfaces, peak
+        value 1.2. Red regions are above 1 and indicate predicted failure.</figcaption>
+    </figure>
+
+    <h2>Conclusion</h2>
+    <p>
+      The model matched peak load within 3.7% and predicted failure in the same places as the
+      physical test. That is close enough to use FEA for screening core designs before printing
+      and testing them.
+    </p>
+    <div class="assessment">
+      <p>
+        The bigger takeaway is where it disagreed. The model is stiffer than the real panel and
+        peaks 0.84 mm early, which comes from assumptions the printed part does not meet:
+        idealized core geometry, uniform ply properties, and a perfect core-skin bond. The pure
+        penalty contact also allows some interpenetration, which adds compliance that is hard to
+        quantify. I also did not run a mesh-convergence study, so the discretization error here is
+        unknown. Closing the deflection gap would mean adding geometric variation and real
+        material scatter to the model, not just changing solver settings.
+      </p>
+    </div>
   </main>
 
   <footer>
