@@ -157,17 +157,26 @@
     </figure>
 
     <p>
-      The model stays linear up to 1.66 mm of deflection and peaks at 5.6 kN before the reaction
-      force drops off. The physical test peaked at 5.4 kN at 2.5 mm. Peak load agrees within
-      3.7%, but the model gets there 0.84 mm earlier, so the simulated panel is stiffer than the
-      real one.
+      The model stays linear through the applied displacement and reaches 5.6 kN at 1.66 mm. The
+      physical test peaked at 5.4 kN at 2.5 mm, so peak load agrees within 3.7%.
     </p>
 
+    <table>
+      <thead>
+        <tr><th></th><th>Peak load</th><th>Deflection at peak</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>FEA</td><td>5.6 kN</td><td>1.66 mm</td></tr>
+        <tr><td>Experiment</td><td>5.4 kN</td><td>2.5 mm</td></tr>
+        <tr class="highlight"><td>Difference</td><td>3.7%</td><td>0.84 mm</td></tr>
+      </tbody>
+    </table>
+
     <figure>
-      <img src="images/composite_load_displacement.png" alt="Load displacement curves from FEA and physical testing">
-      <figcaption><b>Fig. 7.</b> Load vs. displacement, FEA compared with the physical test.
-        Peak load agrees within 3.7%, but the simulated response is stiffer and peaks
-        earlier.</figcaption>
+      <img src="images/load_displacement_exp.png" alt="Load displacement curve from the physical three-point bend test">
+      <figcaption><b>Fig. 7.</b> Load vs. displacement from the physical test. The panel rises to
+        5.4 kN, then loses load in steps as the core fails progressively out to 20 mm. The FEA
+        covers only the elastic rise up to peak.</figcaption>
     </figure>
 
     <p>
