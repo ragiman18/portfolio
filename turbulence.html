@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Turbulence-Model Study on a Finite Wing — Raghav Mansharamani</title>
+  <title>Turbulence-Model Study | Raghav Mansharamani</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,9 +23,221 @@
 
   <main>
     <a class="backlink" href="index.html">&larr; All projects</a>
+
     <p class="eyebrow">Star-CCM+ · RANS</p>
-    <h1>Turbulence-Model Study on a Finite Wing</h1>
-    <div class="stub">Content coming soon.</div>
+    <h1>Turbulence-Model Comparison on a Finite Wing</h1>
+
+    <div class="specblock">
+      <dl>
+        <dt>Objective</dt>
+        <dd>Measure how much the choice of RANS turbulence model changes predicted lift, drag,
+            and boundary-layer behavior on a finite wing when everything else in the setup is
+            held fixed.</dd>
+        <dt>Tools</dt>
+        <dd>Star-CCM+, Siemens NX.</dd>
+        <dt>Models</dt>
+        <dd>Spalart-Allmaras, k-&epsilon;, k-&omega; SST.</dd>
+        <dt>Result</dt>
+        <dd class="result">Spalart-Allmaras predicted roughly <b>3% higher lift</b> and
+            <b>8% lower drag</b> than the two-equation models, while k-&epsilon; and k-&omega; SST
+            agreed with each other within 1%. Peak eddy viscosity differed by a factor of four
+            across the three models.</dd>
+      </dl>
+    </div>
+
+    <h2>Problem</h2>
+    <p>
+      RANS solvers do not resolve turbulence directly. They model it, and the model is a choice
+      the engineer makes rather than something the physics settles. Different models close the
+      equations differently, so the same geometry, mesh, and boundary conditions can produce
+      different lift and drag depending only on which one is selected.
+    </p>
+    <p>
+      This study isolates that variable. A finite wing was simulated three times with identical
+      setup, changing nothing but the turbulence model, to see how far the predictions spread and
+      where the models actually differ. The geometry is a NACA 23012 wing with a 10 m span and
+      1.5 m chord at 10 degrees angle of attack, an airfoil used on propeller aircraft such as
+      the Gulfstream 690C.
+    </p>
+
+    <h2>The three models</h2>
+    <p>
+      All three models tested here work the same way at a basic level. Turbulence mixes momentum
+      through the flow far more aggressively than molecular viscosity alone would, so rather than
+      simulating every eddy, these models treat that mixing as if the fluid were simply thicker in
+      the regions where turbulence is strong. The extra thickness is called eddy viscosity, and it
+      is not a property of the air. It varies from point to point depending on how turbulent the
+      local flow is, and calculating it is the entire job of a turbulence model. Where the three
+      models differ is in how they arrive at that number.
+    </p>
+    <p>
+      <b>Spalart-Allmaras</b> solves a single transport equation for the eddy viscosity directly.
+      It was developed at Boeing specifically for external aerodynamics, and it is cheap to run
+      and forgiving about near-wall mesh quality. It performs well when the flow stays attached to
+      the surface, which makes it a common choice for wings at cruise conditions, but it is less
+      reliable once the flow starts separating.
+    </p>
+    <p>
+      <b>k-&epsilon;</b> solves two equations instead, tracking the energy held in the turbulence
+      and the rate at which that energy dissipates, then combining them to get eddy viscosity. It
+      is well behaved away from surfaces and is a long-standing general-purpose choice, but it
+      needs help very close to the wall and is known to struggle where the pressure rises along
+      the flow direction, which is exactly the condition that leads to separation.
+    </p>
+    <p>
+      <b>k-&omega; SST</b> is a hybrid built to fix that weakness. It uses a k-&omega; formulation
+      near the wall, which handles rising pressure and separation better, and blends into
+      k-&epsilon; further out, where k-&omega; on its own is overly sensitive to freestream
+      conditions. That combination is why it has become a default for external aerodynamics in
+      industry, particularly for high-lift and separated cases.
+    </p>
+    <p>
+      For this case, a finite wing at 10 degrees angle of attack, the flow should be mostly
+      attached with an adverse pressure gradient developing toward the trailing edge. That puts it
+      in territory where all three models are defensible choices, which is what makes it a useful
+      test: the differences that show up are not the result of pushing one model outside the range
+      it was built for.
+    </p>
+
+    <h2>Method</h2>
+
+    <h3>Geometry and domain</h3>
+    <p>
+      The wing was built in NX from NACA 23012 coordinates scaled to a 1.5 m chord, exported as
+      IGES, and subtracted from a 50 m cube to create the far field. The wing has no taper, which
+      keeps the geometry simple enough that any differences in the results trace back to the
+      turbulence model rather than to complex flow features.
+    </p>
+    <p>
+      Flow conditions are air at 25 &deg;C, with density 1.184 kg/m<sup>3</sup> and kinematic
+      viscosity 15.52&times;10<sup>&minus;6</sup> m<sup>2</sup>/s. The inlet is a uniform 85 m/s
+      velocity, roughly the cruise speed of a larger propeller aircraft, with a pressure outlet at
+      atmospheric pressure, slip conditions on the surrounding far-field walls, and no-slip on the
+      wing. At those conditions the chord Reynolds number is about 8.2&times;10<sup>6</sup>.
+    </p>
+
+    <figure>
+      <img src="images/farfieldgeo.png" alt="Far-field domain cube with the wing subtracted, showing inlet and outlet faces">
+      <figcaption><b>Fig. 1.</b> The 50 m far-field domain with the wing subtracted from it. The
+        red face is the velocity inlet and the orange face is the pressure outlet, with the
+        remaining walls set to slip.</figcaption>
+    </figure>
+
+    <h3>Mesh</h3>
+    <p>
+      The domain uses an automated tetrahedral mesh with a 0.2 m base size, coarsening to 1 m in
+      the far field and refined to 0.01 m on the wing surface. Leading-edge curvature was resolved
+      by raising the points-per-circle setting to 100, and a wake refinement region extends 15 m
+      behind the trailing edge at 0.05 m to capture the flow leaving the wing.
+    </p>
+    <p>
+      Prism layers were sized from the turbulent boundary-layer thickness rather than picked
+      arbitrarily. Using the flat-plate estimate
+      &delta;<sub>99</sub> &asymp; 0.37x / Re<sub>x</sub><sup>1/5</sup> at the chord length gives
+      about 0.023 m, which was set as the total prism-layer thickness with 5 layers inside it.
+    </p>
+
+    <figure>
+      <img src="images/boundary_layer.png" alt="Cross-section of the mesh showing prism layers around the airfoil">
+      <figcaption><b>Fig. 2.</b> Mesh cross-section showing the prism layers wrapping the airfoil
+        surface, sized to the estimated boundary-layer thickness.</figcaption>
+    </figure>
+
+    <h3>Solver</h3>
+    <p>
+      All three cases were run as steady, incompressible RANS with identical settings, stopping at
+      500 iterations. The turbulence model is the only thing that changes between runs.
+    </p>
+
+    <h2>Results</h2>
+
+    <table>
+      <thead>
+        <tr><th>Model</th><th>Lift (N)</th><th>C<sub>L</sub></th><th>Drag (N)</th><th>C<sub>D</sub></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Spalart-Allmaras</td><td>57258</td><td>0.892</td><td>3308</td><td>0.0516</td></tr>
+        <tr><td>k-&epsilon;</td><td>55768</td><td>0.869</td><td>3600</td><td>0.0561</td></tr>
+        <tr><td>k-&omega; SST</td><td>55523</td><td>0.863</td><td>3562</td><td>0.0555</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      The two-equation models land close to each other, within 1% on every quantity, while
+      Spalart-Allmaras separates from both. It predicts about 2.6% more lift than k-&epsilon; and
+      3% more than SST, and its drag is 8.8% lower than k-&epsilon; and 7.7% lower than SST. The
+      spread in drag is roughly three times the spread in lift, which follows from where the
+      models do their work: drag on a wing at this Reynolds number is dominated by what happens
+      inside the boundary layer, and that is exactly what the turbulence model controls.
+    </p>
+
+    <p>
+      The velocity and pressure fields show the same grouping. Spalart-Allmaras produces a larger
+      low-velocity region beneath the wing and a correspondingly larger high-pressure region,
+      which is consistent with the higher lift it predicts. Its wake is also noticeably shorter
+      than the wakes from the two-equation models. Between k-&epsilon; and SST the fields are
+      close to indistinguishable by eye.
+    </p>
+
+    <figure>
+      <img src="images/velcoity.png" alt="Velocity magnitude fields for the three turbulence models">
+      <figcaption><b>Fig. 3.</b> Velocity magnitude at half wingspan for each model, on a common
+        scale from 0 to 157 m/s.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/presha.png" alt="Absolute pressure fields for the three turbulence models">
+      <figcaption><b>Fig. 4.</b> Absolute pressure at half wingspan and on the wing surface. The
+        Spalart-Allmaras case carries a larger high-pressure region under the wing.</figcaption>
+    </figure>
+
+    <p>
+      The eddy viscosity fields are where the models diverge most. Peak turbulent viscosity is
+      0.0413 Pa&middot;s for k-&epsilon;, 0.018 for k-&omega; SST, and 0.0101 for
+      Spalart-Allmaras, a factor of four between the highest and lowest. The distributions differ
+      as well: SST produces the widest wake with high turbulent viscosity at and behind the
+      trailing edge, k-&epsilon; and SA produce tighter wakes, and on the wing surface itself SA
+      concentrates eddy viscosity over the rear half while the two-equation models put more near
+      the leading edge.
+    </p>
+    <p>
+      That contrast is the most useful result here. The integrated forces differ by a few percent,
+      which looks tolerable, but the underlying turbulence fields differ by several hundred
+      percent. The models are behaving quite differently internally and partially compensating by
+      the time everything is integrated into a force coefficient.
+    </p>
+
+    <figure>
+      <img src="images/eddyisco.png" alt="Turbulent eddy viscosity fields for the three turbulence models">
+      <figcaption><b>Fig. 5.</b> Turbulent eddy viscosity for each model. Each plot uses its own
+        scale, so the colors are not comparable between them: the legends run to 0.018 for SST,
+        0.0413 for k-&epsilon;, and 0.0101 for SA. The shapes are comparable, and SST clearly
+        carries the widest wake.</figcaption>
+    </figure>
+
+    <h2>Conclusion</h2>
+    <p>
+      Changing only the turbulence model moved predicted drag by nearly 9% and lift by about 3% on
+      an otherwise identical setup. The one-equation model separated from the two-equation pair
+      more than they separated from each other, and the eddy viscosity fields showed differences
+      far larger than the force coefficients suggest. For any analysis where drag is the quantity
+      that matters, the model is not a detail to leave at its default.
+    </p>
+    <div class="assessment">
+      <p>
+        This study shows that the models disagree, not which one is correct. There is no
+        experimental or wind-tunnel data in the comparison, so nothing here establishes a true
+        value to measure against, and the closest thing to a reference is that the two-equation
+        models agree with each other. The runs also stopped at a fixed 500 iterations rather than
+        at a convergence criterion, so the differences include whatever iterative error remained.
+        No grid-convergence study was run, which is the larger gap: mesh-induced error is
+        unquantified and could be the same size as the model differences being reported. Five
+        prism layers across the full boundary-layer thickness is coarse, and y+ was not recorded,
+        so near-wall resolution is likely in the range where wall treatment matters, which is
+        itself one of the things that differs between these models. A stronger version of this
+        study would fix the mesh question first, then compare against measured data.
+      </p>
+    </div>
   </main>
 
   <footer>
