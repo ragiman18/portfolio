@@ -59,6 +59,13 @@
       it.
     </p>
 
+    <figure>
+      <img src="images/sincoreprinted.jpeg" alt="Printed continuous carbon fiber sinusoidal core structure">
+      <figcaption><b>Fig. 1.</b> The printed sinusoidal core before skins are added. The tows
+        overlap where the sinusoids cross, and the fiber bundles vary in width along their
+        length, which is the kind of detail an idealized CAD model does not carry.</figcaption>
+    </figure>
+
     <h2>Method</h2>
 
     <h3>Geometry</h3>
@@ -66,8 +73,28 @@
       The core, skins, and bend test pins were modeled in NX as surfaces, with composite
       thickness added later in ACP. The surfaces were offset vertically by the exact ply
       thickness that would be applied, so the finished solid model has the parts in contact
-      instead of overlapping.
+      instead of overlapping or floating apart.
     </p>
+
+    <figure>
+      <img src="images/iso_surface_sin__1_.png" alt="Isometric view of surface model with core, skins, and pins">
+      <figcaption><b>Fig. 2.</b> Surface model of the core, skins, and three pins before ply
+        thickness is applied in ACP.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/front_offset_sin.png" alt="Front view showing vertical offsets between skin, core, and pin surfaces">
+      <figcaption><b>Fig. 3.</b> Front view of the same model. The surfaces sit at different
+        heights by exactly the ply thickness each one will gain, so they end up touching once the
+        layup is built.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/sin_solid__1___1_.png" alt="Solid model of sandwich panel with pins after ply thickness applied">
+      <figcaption><b>Fig. 4.</b> The resulting solid model, with skins and core aligned and in
+        contact.</figcaption>
+    </figure>
+
     <p>
       The core was scaled to the tested specimen: 304.8 mm long, 254 mm support span, 25.4 mm
       steel pins. The original CAD has a gap between the sinusoidal and straight core sections,
@@ -91,6 +118,12 @@
       data on the same printing process.
     </p>
 
+    <figure>
+      <img src="images/sin_fiber_direc__1_.png" alt="Fiber direction arrows following the sinusoidal core geometry">
+      <figcaption><b>Fig. 5.</b> Fiber direction through the core, following the sinusoid rather
+        than a single global direction. This matches how the printer lays the tow down.</figcaption>
+    </figure>
+
     <h3>Contacts and loading</h3>
     <p>
       The core-to-skin interface is bonded with contact debonding using a bilinear cohesive zone
@@ -110,18 +143,6 @@
       freely.
     </p>
 
-    <figure>
-      <img src="images/composite_solid_model.png" alt="Solid model of sinusoidal core sandwich panel with bend test pins">
-      <figcaption><b>Fig. 1.</b> Solid model of the sandwich panel and bend test fixture after
-        ply thicknesses are applied in ACP.</figcaption>
-    </figure>
-
-    <figure>
-      <img src="images/composite_fiber_direction.png" alt="Fiber direction following the sinusoidal core geometry">
-      <figcaption><b>Fig. 2.</b> Core fiber direction following the sinusoid, defined from edge
-        sets built on named selections.</figcaption>
-    </figure>
-
     <h2>Results</h2>
     <p>
       The predicted deformation is smooth and symmetric, with the maximum deflection under the
@@ -130,9 +151,9 @@
     </p>
 
     <figure>
-      <img src="images/composite_deformation.png" alt="Total deformation contour of the sandwich panel">
-      <figcaption><b>Fig. 3.</b> Total deformation at peak load, with 1.66 mm maximum deflection
-        under the loading pin.</figcaption>
+      <img src="images/totaldefo.png" alt="Total deformation contour of the sandwich panel under bending">
+      <figcaption><b>Fig. 6.</b> Total deformation at peak load, with 1.66 mm maximum deflection
+        under the loading pin tapering to zero at the supports.</figcaption>
     </figure>
 
     <p>
@@ -144,8 +165,9 @@
 
     <figure>
       <img src="images/composite_load_displacement.png" alt="Load displacement curves from FEA and physical testing">
-      <figcaption><b>Fig. 4.</b> Load vs. displacement, FEA compared with the physical test.
-        Peak load agrees within 3.7%, but the simulated response is stiffer and peaks earlier.</figcaption>
+      <figcaption><b>Fig. 7.</b> Load vs. displacement, FEA compared with the physical test.
+        Peak load agrees within 3.7%, but the simulated response is stiffer and peaks
+        earlier.</figcaption>
     </figure>
 
     <p>
@@ -156,8 +178,8 @@
     </p>
 
     <figure>
-      <img src="images/composite_tsai_wu.png" alt="Tsai-Wu failure criterion contour, top and bottom views">
-      <figcaption><b>Fig. 5.</b> Tsai-Wu failure criterion on the top and bottom surfaces, peak
+      <img src="images/tsaiwu.png" alt="Tsai-Wu failure criterion contour, top and bottom views">
+      <figcaption><b>Fig. 8.</b> Tsai-Wu failure criterion on the top and bottom surfaces, peak
         value 1.2. Red regions are above 1 and indicate predicted failure.</figcaption>
     </figure>
 
@@ -171,11 +193,13 @@
       <p>
         The bigger takeaway is where it disagreed. The model is stiffer than the real panel and
         peaks 0.84 mm early, which comes from assumptions the printed part does not meet:
-        idealized core geometry, uniform ply properties, and a perfect core-skin bond. The pure
-        penalty contact also allows some interpenetration, which adds compliance that is hard to
-        quantify. I also did not run a mesh-convergence study, so the discretization error here is
-        unknown. Closing the deflection gap would mean adding geometric variation and real
-        material scatter to the model, not just changing solver settings.
+        idealized core geometry, uniform ply properties, and a perfect core-skin bond. Fig. 1
+        shows the gap directly, since the printed tows vary in width and pile up where the
+        sinusoids cross, while the model treats every ply as identical. The pure penalty contact
+        also allows some interpenetration, which adds compliance that is hard to quantify. I also
+        did not run a mesh-convergence study, so the discretization error here is unknown. Closing
+        the deflection gap would mean adding geometric variation and real material scatter to the
+        model, not just changing solver settings.
       </p>
     </div>
   </main>
