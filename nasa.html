@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Overset CFD &amp; Independent V&amp;V — Raghav Mansharamani</title>
+  <title>NASA JSC: Overset CFD | Raghav Mansharamani</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,9 +23,212 @@
 
   <main>
     <a class="backlink" href="index.html">&larr; All projects</a>
-    <p class="eyebrow">NASA Johnson Space Center · CFD</p>
-    <h1>Overset CFD &amp; Independent V&amp;V</h1>
-    <div class="stub">Content coming soon.</div>
+
+    <p class="eyebrow">NASA Johnson Space Center · Applied Aeroscience and CFD Branch (EG3)</p>
+    <h1>Overset CFD and Aerodynamic Database Verification</h1>
+
+    <div class="specblock">
+      <dl>
+        <dt>Objective</dt>
+        <dd>Automate structured overset grid generation for a vehicle with movable control
+            surfaces, run the CFD that populates an aerodynamic force and moment database, and
+            verify that database against other solvers and wind tunnel data.</dd>
+        <dt>Tools</dt>
+        <dd>OVERFLOW, Chimera Grid Tools (CGT), OVERGRID, PEGASUS, Pointwise, TCL, Python,
+            Dynaplot, HPC clusters.</dd>
+        <dt>Context</dt>
+        <dd>Engineering intern in the Applied Aeroscience and CFD Branch (EG3), supporting the
+            HyperSTEP project.</dd>
+        <dt>Result</dt>
+        <dd class="result">Built a TCL pipeline that takes a control surface deflection angle as
+            input and regenerates the entire overset grid system for that configuration. Ran
+            OVERFLOW cases across subsonic, transonic, and supersonic conditions, and ran the
+            cross-solver and wind tunnel comparison that identified a discrepancy large enough to
+            require regenerating part of an existing database.</dd>
+      </dl>
+    </div>
+
+    <p class="muted" style="font-family:var(--mono);font-size:13px;border-left:3px solid var(--border);padding-left:16px">
+      This page describes methods and workflow only. Vehicle geometry, grid systems, aerodynamic
+      coefficients, and program-specific results are not shown.
+    </p>
+
+    <h2>Problem</h2>
+    <p>
+      A vehicle flying back through the atmosphere needs a guidance system that knows how it will
+      behave aerodynamically along the way. That comes from an aerodynamic database: a lookup of
+      forces and moments across the range of Mach numbers, angles of attack, sideslip angles, and
+      control surface deflections the vehicle might see. Guidance teams run large numbers of trajectory simulations
+      against that database to check the vehicle stays controllable across the spread of conditions
+      it could encounter.
+    </p>
+    <p>
+      Those simulations inherit whatever is wrong with the database. If the aerodynamics are off in
+      some region of the envelope, every trajectory through that region is off with it, and nothing
+      inside the simulation will show it. My work covered building the database and validating it.
+    </p>
+
+    <h2>Overset grids</h2>
+    <p>
+      The CFD ran on structured overset grids, also called Chimera grids. Instead of forcing a
+      single mesh to conform to a complicated shape, the geometry is split into components, each
+      given its own structured grid, and the grids are allowed to overlap. Where they overlap they
+      exchange solution data, so the separate grids behave as one continuous flow field. Each grid
+      stays clean and well-shaped, and a component that moves, like a control surface, can be
+      regridded without rebuilding everything around it.
+    </p>
+    <p>
+      The cost is a multi-stage setup process, and every stage has to be right before the next one
+      is meaningful.
+    </p>
+
+    <h3>Definition grids</h3>
+    <p>
+      The starting point is a geometric description of each component. Only the negative Y half of
+      the vehicle was meshed, with the full grid recovered later by mirroring. The CAD carried some
+      small asymmetries near the control surfaces and fairings, which were artifacts rather than
+      real geometry, so those were cleaned up during meshing.
+    </p>
+    <p>
+      The body, control surface, and fairing were meshed separately in Pointwise, then split into
+      their component surfaces: the body into nose, base, and body sections, the control surface
+      into top, bottom, and border, and the fairing into its curved surface and border. That
+      decomposition is what makes the rest of the overset process work, since each surface gets its
+      own grid and every boundary between them has to be handled deliberately.
+    </p>
+    <p>
+      Pointwise is where the manual work ended. Everything downstream of it, including the surface
+      splitting, was scripted.
+    </p>
+
+    <h3>Surface grids</h3>
+    <p>
+      Surface grids are generated on each component. This is where the automation ran, written as
+      TCL scripts using the script library in
+      <a href="https://www.nas.nasa.gov/software/chimera.html">Chimera Grid Tools</a>, NASA's
+      overset grid package, which exists so a grid system can be described in code instead of
+      assembled by hand. The scripts read in the definition grids, redistribute
+      point spacing across each surface, match spacing between grids that share a boundary, grow
+      grids past the edges of their surfaces to create overlap with their neighbors, verify that the
+      overlap is sufficient, combine the resulting grids, and mirror the system about the Y plane to
+      recover the full vehicle.
+    </p>
+    <p>
+      Matching spacing and controlling overlap are the parts that determine whether the system will
+      work. Two grids that meet with mismatched point spacing interpolate poorly across the
+      boundary, and grids that do not extend far enough past their surface leave regions with no
+      valid donor to interpolate from.
+    </p>
+
+    <h3>Volume grids</h3>
+    <p>
+      The solver needs points throughout the flow field, not just on the surface, so each surface
+      grid is marched outward into the volume. Every component ends up carrying its own body-fitted
+      volume grid extending into the surrounding flow.
+    </p>
+
+    <h3>Hole cutting and interpolation</h3>
+    <p>
+      At this point the model is a set of overlapping bodies, and the solver needs one connected
+      domain. <a href="https://www.nas.nasa.gov/publications/software/docs/pegasus5/pages/sec1.html">PEGASUS</a>,
+      NASA's overset pre-processor, handles that final step. It blanks out grid points that fall
+      inside a solid body, cutting holes where one component sits inside another's grid, and builds
+      the domain connectivity database that tells the solver which points get their values
+      interpolated from which donor cells in the overlapping grids. The output is the grid system
+      OVERFLOW actually solves on.
+    </p>
+    <p>
+      PEGASUS automates most of this, but the documentation is explicit that it is not a black box
+      and the resulting grid system still has to be examined. Orphan points, meaning points that
+      need interpolated data but have no valid donor, are the usual sign that something upstream in
+      the overlap or spacing needs fixing.
+    </p>
+
+    <h2>Automating for control surface deflections</h2>
+    <p>
+      A database needs grids at many control surface deflections, not one. Rebuilding the grid
+      system by hand for each angle is slow, and it introduces inconsistency between grids that are
+      supposed to differ only by deflection.
+    </p>
+    <p>
+      The scripted pipeline takes the deflection angle as an input and regenerates the whole system
+      from it: surface grids, volume grids, and connectivity. Beyond saving the labor, it means
+      every configuration in the database was built the same way, so differences between cases come
+      from the flow rather than from how someone happened to build that particular grid. It also
+      works for configurations that had not been designed yet.
+    </p>
+
+    <h2>CFD and database generation</h2>
+    <p>
+      Flow solutions were run in <a href="https://www.nasa.gov/reference/overflow-cfd/">OVERFLOW</a>,
+      NASA's structured overset RANS solver, on HPC clusters.
+      Populating a database means sweeping a matrix of conditions: Mach numbers across subsonic,
+      transonic, and supersonic flight, across a range of angles of attack, sideslip angles, and
+      control surface deflections. At that volume, job management is part of the work, since cases have to be
+      submitted, tracked, and checked for convergence, and a case that stalls short of convergence
+      without failing is worse than one that crashes.
+    </p>
+    <p>
+      The transonic portion is the hardest part of the sweep. Shocks form and move across the
+      vehicle as Mach number changes, forces can shift sharply over small changes in condition, and
+      solver behavior is less forgiving than in clearly subsonic or supersonic flow. It is also
+      where simplified methods lose accuracy fastest.
+    </p>
+
+    <h2>Verification</h2>
+    <p>
+      Verification is separate from generating results. The question is not whether a solution
+      converged, but whether the numbers going into the database are right, and that can only be
+      answered against something produced independently.
+    </p>
+    <p>
+      I wrote Python tooling to pull force and moment coefficients out of solver output, reformat
+      results from different sources into a common structure, and plot them against each other in
+      Dynaplot. The comparisons ran across solvers of different fidelity, including OVERFLOW,
+      Kestrel, Loci-CHEM, and Cart3D, and against wind tunnel data.
+    </p>
+    <p>
+      Getting results from different codes into a comparable state is most of the work. Solvers
+      write different output formats, use different sign and axis conventions, and can reference
+      different moment centers. None of that is visible in a plot until the curves fail to line up,
+      and a convention mismatch looks the same as a real disagreement. Resolving those first is what
+      makes a discrepancy meaningful when one appears.
+    </p>
+    <p>
+      In one case the comparison showed a disagreement that could not be explained by conventions or
+      by the differences expected between fidelity levels. It appeared in a regime where the
+      simplified method was being asked to capture flow physics it does not model, and it was large
+      enough to justify regenerating that portion of the database from higher-fidelity results.
+    </p>
+
+    <!-- Figure slot: workflow diagram goes here when cleared.
+         <figure>
+           <img src="images/nasa_workflow.png" alt="Overset CFD and verification workflow">
+           <figcaption><b>Fig. 1.</b> ...</figcaption>
+         </figure>
+    -->
+
+    <h2>Conclusion</h2>
+    <p>
+      The work ran from geometry to a checked database: scripting the overset grid generation so new
+      control surface configurations could be produced repeatably, running the CFD matrix behind the
+      database, and comparing results against other solvers and wind tunnel data. The verification
+      is the part worth highlighting, since an existing database is easy to treat as settled, and
+      the discrepancy only surfaced because the comparison was actually run.
+    </p>
+    <div class="assessment">
+      <p>
+        The specifics here are not mine to publish, so this page is the method without the evidence,
+        which limits how much a reader can judge for themselves. On the technical side, two things
+        are worth being clear about. Agreement between solvers is a consistency check, not proof of
+        correctness: codes built on similar modeling assumptions can agree with each other and still
+        be wrong in the same direction. Wind tunnel data is the closer thing to ground truth, but
+        tunnel tests run at model scale and at Reynolds numbers different from flight, so
+        disagreement with CFD does not automatically mean the CFD is at fault. The database is also
+        built from steady RANS solutions, so turbulence is modeled rather than resolved and unsteady
+        behavior is not captured at all.
+      </p>
+    </div>
   </main>
 
   <footer>
