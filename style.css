@@ -297,43 +297,29 @@ details {
   border: 1px solid var(--border);
   border-left: 3px solid var(--red-dim);
   border-radius: 6px;
-  margin: 22px 0;
+  margin: 20px 0;
   padding: 0 20px;
 }
-details[open] { padding-bottom: 6px; }
+details[open] { padding-bottom: 4px; }
 summary {
   cursor: pointer;
   padding: 14px 0;
   font-family: var(--mono);
   font-size: 13px;
   letter-spacing: 0.02em;
-  font-style: italic;
-  color: var(--muted);
+  color: var(--text);
   list-style: none;
-  text-decoration: underline;
-  text-decoration-color: var(--border);
-  text-underline-offset: 4px;
 }
 summary::-webkit-details-marker { display: none; }
 summary::before {
   content: "+";
-  font-style: normal;
   color: var(--red);
   font-weight: 600;
   margin-right: 10px;
-  display: inline-block;
 }
 details[open] summary::before { content: "\2212"; }
-details[open] summary { color: var(--text); }
-summary:hover {
-  color: var(--red);
-  text-decoration-color: var(--red);
-}
-/* body of an open dropdown sits in its own inset panel */
-details[open] > *:not(summary) {
-  font-size: 0.96em;
-}
-details > *:not(summary):first-of-type { margin-top: 4px; }
+summary:hover { color: var(--red); }
+details > *:not(summary) { font-size: 0.96em; }
 details table { font-size: 13px; }
 details pre {
   background: var(--bg);
@@ -344,5 +330,5 @@ details pre {
   font-family: var(--mono);
   font-size: 12.5px;
   color: var(--text);
-  line-height: 1.55;
+  line-height: 1.5;
 }
