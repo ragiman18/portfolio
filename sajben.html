@@ -30,8 +30,8 @@
     <div class="specblock">
       <dl>
         <dt>Objective</dt>
-        <dd>Solve a compressible internal flow with a shock, bound the numerical error, then
-            characterize where RANS departs from experiment.</dd>
+        <dd>Solve a compressible internal flow with a shock, measure how much of the error comes
+            from the mesh, then characterize where RANS departs from experiment.</dd>
         <dt>Tools</dt>
         <dd>Simcenter STAR-CCM+ 2210, Python.</dd>
         <dt>Case</dt>
@@ -41,10 +41,10 @@
         <dd>Built the geometry, mesh family, and case setup; ran all cases; wrote the
             post-processing and V&amp;V analysis.</dd>
         <dt>Result</dt>
-        <dd class="result">Grid-converged shock position <b>1.4230 x/h</b> with numerical
-            uncertainty (GCI) of <b>0.22%</b>, against an experimental <b>1.280</b>. That is a
-            <b>+11.2% modelling error, roughly 50x larger than the discretisation
-            uncertainty</b>. Turbulence closure accounts for about half of it.</dd>
+        <dd class="result">Grid-converged shock position <b>1.4230 x/h</b> with a numerical
+            uncertainty of <b>0.22%</b>, against an experimental <b>1.280</b>. That is a
+            <b>+11.2% modeling error, roughly 51 times larger than the mesh uncertainty</b>.
+            Choice of turbulence model accounts for about half of it.</dd>
       </dl>
     </div>
 
@@ -52,22 +52,24 @@
     <p>
       When a CFD result disagrees with experiment, there are two possible causes. Either the
       equations were solved imprecisely, meaning the mesh was too coarse, or the wrong equations
-      were solved, meaning the physical model is inadequate. Most studies cannot separate these,
+      were solved, meaning the physical model is inadequate. Most studies cannot tell these apart,
       which makes a statement like "my result is 10% off" close to uninterpretable. The
       disagreement might vanish on a finer mesh, or it might be the physics, and without further
-      work there is no way to tell which.
+      work there is no way to know which.
     </p>
     <p>
-      This study separates them. Three systematically refined meshes bound the numerical
-      contribution to a quantified uncertainty. Once that bound exists, whatever disagreement
-      remains is attributable to the model. This is standard practice in industrial verification
-      and validation, and it is the step most commonly skipped.
+      Running the same case on three meshes of increasing resolution shows how much the answer is
+      still moving as the mesh improves, and that puts a number on how much of the error the mesh
+      is responsible for. If that number is small, a large remaining disagreement has to be coming
+      from the model instead. This is standard practice in industrial verification and validation,
+      and it is the step most commonly skipped.
     </p>
     <p>
-      The case is relevant to propulsion as an analogue for off-nominal, overexpanded nozzle flow:
-      a shock sitting inside the duct with shock-induced separation, as occurs at low altitude or
-      during throttling. It is deliberately not the clean isentropic expansion of a nozzle at its
-      design point.
+      This flow is an analog for off-nominal, overexpanded nozzle operation: a shock sitting inside
+      the duct with the boundary layer separating behind it, which is what happens to a rocket
+      nozzle at low altitude or during throttling. It is deliberately not the clean isentropic
+      expansion of a nozzle running at its design point, and shock position matters in that regime
+      because it sets where the flow separates from the wall.
     </p>
 
     <details>
@@ -75,28 +77,27 @@
       <p>
         <b>Verification asks: am I solving the equations right?</b> This is pure mathematics and
         has nothing to do with reality. The RANS equations have an exact solution on an infinitely
-        fine mesh. Any real mesh is finite, so the answer carries a discretisation error.
-        Verification measures that error. It could be done without ever looking at experimental
-        data.
+        fine mesh. Any real mesh is finite, so the answer carries an error from that. Verification
+        measures it. You could do verification without ever looking at experimental data.
       </p>
       <p>
         <b>Validation asks: am I solving the right equations?</b> This compares against physical
-        measurement. Whatever disagreement remains after the numerical error has been bounded is
-        attributable to the model itself: the turbulence closure, the 2D assumption, the steady
+        measurement. Whatever disagreement remains after the numerical error has been measured is
+        attributable to the model itself: the turbulence model, the 2D assumption, the steady
         assumption.
       </p>
       <p>
-        The order matters. You cannot honestly claim RANS is wrong by 11% until you have shown
-        that mesh error is much smaller than 11%.
+        The order matters. You cannot honestly claim RANS is wrong by 11% until you have shown that
+        mesh error is much smaller than 11%.
       </p>
     </details>
 
     <h2>The case</h2>
     <p>
-      The Sajben diffuser is a converging-diverging duct that is one-sided: the lower wall is flat
-      across the entire domain and all area variation is in the upper wall. That asymmetry is why
-      the experiment reports upper and lower wall pressures separately, and it provides two
-      independent validation curves from a single run.
+      The Sajben diffuser is a converging-diverging duct that is one-sided. The lower wall is flat
+      across the whole domain and all of the area change happens in the upper wall. Because the two
+      walls have different shapes, the pressure measured along each one is different, so a single
+      run can be checked against two separate sets of experimental data rather than one.
     </p>
     <p>
       Air enters subsonically at M = 0.46, accelerates through the contraction to about M = 1.25
@@ -104,99 +105,104 @@
       recovers subsonically through the diffuser.
     </p>
     <p>
-      What makes it a hard case is that the shock and the boundary layer are coupled. The shock's
-      pressure rise thickens and separates the boundary layer, the separated layer changes the
-      effective flow area, and the effective area determines where the shock sits. RANS turbulence
-      models handle this coupling imperfectly, and the characteristic failure, a shock predicted
-      slightly downstream of the measured position, appears across every code in the archive.
+      What makes it a hard case is that the shock and the boundary layer feed back on each other.
+      The shock's pressure rise thickens and separates the boundary layer, the separated layer
+      changes how much of the duct the flow can actually use, and that in turn moves the shock.
+      RANS turbulence models handle this interaction imperfectly, and the documented failure mode
+      for this case is a shock predicted slightly downstream of where it was measured.
     </p>
 
     <table>
       <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
       <tbody>
-        <tr><td>Total pressure P0</td><td>19.58 psia (134,999 Pa)</td></tr>
-        <tr><td>Total temperature T0</td><td>500 R (277.778 K)</td></tr>
+        <tr><td>Stagnation pressure</td><td>19.58 psia (134,999 Pa)</td></tr>
+        <tr><td>Stagnation temperature</td><td>500 R (277.778 K)</td></tr>
         <tr><td>Inlet Mach</td><td>0.46</td></tr>
         <tr><td>Exit static pressure (weak shock)</td><td>16.05 psia (110,661 Pa)</td></tr>
         <tr><td>Throat height h</td><td>0.14435 ft (0.0439979 m)</td></tr>
-        <tr><td>Reynolds number (throat height)</td><td>6.0 &times; 10<sup>5</sup></td></tr>
+        <tr><td>Reynolds number, based on throat height</td><td>6.0 &times; 10<sup>5</sup></td></tr>
       </tbody>
     </table>
 
     <p>
-      Exit static pressure alone sets the shock strength, which is what makes this a clean
-      parametric case.
+      Exit static pressure alone sets how strong the shock is, which is what makes this a clean case
+      to run parametrically.
     </p>
 
     <figure>
       <img src="images/sajben_mach_full.png" alt="Mach number contour through the full diffuser">
       <figcaption><b>Fig. 1.</b> Mach number through the full domain, fine mesh. Flow accelerates
-        through the contraction, reaches supersonic conditions past the throat, and terminates in
-        a normal shock. The low-velocity region along the upper wall downstream of the shock is
-        the separated boundary layer.</figcaption>
+        through the contraction, goes supersonic past the throat, and terminates in a normal shock.
+        The low-velocity region along the upper wall behind the shock is the separated boundary
+        layer.</figcaption>
     </figure>
 
     <h2>Setup</h2>
 
     <h3>Geometry</h3>
     <p>
-      Wall coordinates come from the archive as 81 points per wall. Connecting those points with
-      straight segments produces a wall that deviates from a smooth curve by up to 350 um at worst,
-      in the high-curvature part of the contraction. The finest first-cell height in the mesh
-      family is 1.09 um, so the faceting error would be roughly 320 times the first cell height,
-      and every facet corner would act as a spurious weak compression polluting the boundary layer
-      the mesh was built to resolve. Both walls were therefore resampled onto a cubic spline at 801
-      points before meshing.
+      The archive provides each wall as 81 coordinate points. Joining those points with straight
+      lines leaves the wall slightly kinked rather than smooth, and in the tightest part of the
+      contraction that straight-line wall sits up to 350 um away from where a smooth curve would
+      run. That is around 300 times the height of the smallest cell in the mesh, so every kink
+      would act as a small artificial disturbance in exactly the boundary layer the mesh was built
+      to resolve. Both walls were therefore resampled onto a cubic spline before meshing.
     </p>
     <p>
-      The resampled geometry was checked against the archive specification: throat height 1.732199
-      in against 1.73221 in, and exit-to-throat area ratio 1.5000 against 1.5.
+      The resampled geometry was checked against the archive specification and matched the quoted
+      throat height and exit-to-throat area ratio to within 0.001%.
     </p>
     <p>
-      This is an assumption worth stating plainly. The cubic spline is a reconstruction of the wall
-      between NASA's points, and the true tunnel contour is not available. A spline is the standard
-      choice for a smooth physical wall and is far closer to reality than piecewise-linear
-      segments, but it is not the original geometry.
+      One assumption is worth stating. The spline is a reconstruction of the wall between NASA's
+      points, and the original tunnel contour is not available. A spline is the standard choice for
+      a smooth physical wall and is far closer to reality than straight segments, but it is not the
+      original geometry.
     </p>
 
     <h3>Boundary conditions</h3>
     <table>
       <thead><tr><th>Boundary</th><th>Type</th><th>Values</th></tr></thead>
       <tbody>
-        <tr><td>Inlet</td><td>Stagnation inlet</td><td>P0 = 134,999 Pa, T0 = 277.778 K</td></tr>
+        <tr><td>Inlet</td><td>Stagnation inlet</td><td>P<sub>0</sub> = 134,999 Pa, T<sub>0</sub> = 277.778 K</td></tr>
         <tr><td>Outlet</td><td>Pressure outlet</td><td>110,661 Pa static</td></tr>
         <tr><td>Both walls</td><td>No-slip, adiabatic</td><td></td></tr>
       </tbody>
     </table>
     <p>
-      The inflow is subsonic, so the inlet state is not determined by upstream values alone:
-      downstream pressure information propagates back to it. A stagnation inlet imposes P0 and T0
-      and lets the boundary compute velocity from the interior solution, which is the physically
-      correct treatment for a reservoir-driven subsonic inflow. A velocity inlet would hard-code
-      the quantity being predicted.
+      The inflow is subsonic, so conditions at the inlet are not fixed by what is upstream alone.
+      Pressure information travels back up the duct from downstream and affects the inlet as well.
+      A stagnation inlet handles this correctly by imposing stagnation pressure and temperature and
+      letting the solver work out the velocity from the interior solution, which is what a flow fed
+      from a reservoir actually does. A velocity inlet would instead force the velocity to a chosen
+      value, which means fixing the answer rather than predicting it.
     </p>
     <p>
-      That choice produces a free verification check. Mach number was never imposed anywhere in the
-      setup, and it converged to <b>0.4600</b> against the published 0.46, an error of 0.01%. For
-      that to happen, the geometry, the boundary conditions, and the gas model all have to be
-      mutually consistent. A geometry error, a unit error, or a wrong reference pressure would show
-      up here.
+      That choice provides a free check on the whole setup. No Mach number was imposed anywhere,
+      yet the solution settled at an inlet Mach of <b>0.46005</b> against the published 0.46, an
+      error of 0.01%. For that to happen, the geometry, the boundary conditions, and the gas model
+      all have to be consistent with each other. A geometry error, a unit error, or a wrong
+      reference pressure would show up here.
     </p>
     <p>
       A second assumption: the archive does not specify inlet turbulence quantities, so solver
-      defaults were retained (turbulence intensity 1%, turbulent viscosity ratio 10). Using the
-      default is more defensible than a hand-picked value when nothing is sourced.
+      defaults were kept (turbulence intensity 1%, turbulent viscosity ratio 10). Keeping the
+      default is easier to defend than a hand-picked value when nothing is sourced.
     </p>
 
     <h3>Mesh</h3>
     <p>
-      Structured mesh built with STAR-CCM+ Directed Mesh, three levels, refinement ratio exactly
-      r = 1.5 in both directions.
+      Structured mesh built with STAR-CCM+ Directed Mesh, three levels, with every cell dimension
+      shrinking by exactly 1.5 between levels.
+    </p>
+    <p>
+      Cell height at the wall was sized using a flat-plate skin friction correlation evaluated at
+      throat conditions, where wall shear is highest, targeting y+ = 2 on the coarse mesh. Sizing
+      at the throat makes every other part of the duct better resolved than required.
     </p>
 
     <table>
       <thead>
-        <tr><th>Mesh</th><th>Cells</th><th>Streamwise dx</th><th>First cell dy1</th><th>Achieved y+</th><th>Near-wall AR</th></tr>
+        <tr><th>Mesh</th><th>Cells</th><th>Streamwise &Delta;x</th><th>First cell height</th><th>Achieved y+</th><th>Near-wall aspect ratio</th></tr>
       </thead>
       <tbody>
         <tr><td>Coarse</td><td>12,800</td><td>3.490 mm</td><td>2.456 um</td><td>0.998</td><td>1421</td></tr>
@@ -205,59 +211,109 @@
       </tbody>
     </table>
 
+    <details>
+      <summary>What these mesh quantities mean</summary>
+      <p>
+        <b>Streamwise &Delta;x</b> is the length of a cell along the flow direction. Smaller means
+        the shock is captured over a shorter distance and its position is pinned down more
+        precisely.
+      </p>
+      <p>
+        <b>First cell height</b> is the thickness of the very first cell sitting against the wall,
+        measured perpendicular to it. Velocity changes extremely rapidly across the boundary layer,
+        so this cell has to be tiny to capture that gradient.
+      </p>
+      <p>
+        <b>y+</b> is a dimensionless measure of how far that first cell center sits from the wall,
+        scaled by the local friction at the wall. It tells you whether the near-wall mesh is fine
+        enough for the turbulence model. Below about 1, the model resolves the flow right down to
+        the wall. Above about 30, it uses a formula to bridge the gap instead. The range in between
+        is the worst place to be. All three meshes here sit below 1.
+      </p>
+      <p>
+        <b>Near-wall aspect ratio</b> is the streamwise cell length divided by the first cell
+        height, so it describes cell shape. A value of 1421 means these cells are long and thin,
+        which is normal for a boundary layer mesh, since the flow changes far faster perpendicular
+        to the wall than along it.
+      </p>
+    </details>
+
     <p>
-      The identical near-wall aspect ratio across all three meshes is the quantitative proof of
-      geometric self-similarity, which is the condition Richardson extrapolation requires. Both
-      cell dimensions scale by exactly 1/1.5 per level, so cell shape is preserved and only cell
-      size changes. Most studies assert self-similarity; here it is a number that demonstrates it.
+      The near-wall aspect ratio being identical on all three meshes is the useful number here. It
+      shows the three meshes are genuinely the same mesh at different scales rather than three
+      different meshes, because cell shape is preserved and only cell size changes. That is the
+      condition the grid convergence method requires, and most studies assert it without
+      demonstrating it.
     </p>
     <p>
-      Worth noting that y+ is non-monotonic across the family (0.998, 0.866, 0.933) even though
-      cell heights shrink monotonically. y+ depends on computed wall shear as well as spacing, and
-      better boundary-layer resolution produces higher computed shear, which partly offsets the
-      finer cells. All three meshes are wall-resolved regardless. y+ had been predicted at 2.0 from
-      a flat-plate correlation and came out near 1.0, because the correlation overestimates wall
-      shear at the throat where it does not account for the favourable pressure gradient of
-      accelerating flow.
+      Worth noting that y+ does not fall steadily across the family (0.998, 0.866, 0.933) even
+      though the cells get smaller every time. y+ depends on the computed wall friction as well as
+      the cell size, and better boundary layer resolution produces higher computed friction, which
+      partly cancels the effect of the finer cells. All three meshes are wall-resolved regardless.
     </p>
 
     <details>
-      <summary>Why structured, and why r = 1.5 rather than the more common root-2</summary>
+      <summary>Why structured, and why refine by 1.5 rather than the more common root-2</summary>
       <p>
-        <b>Structured</b> because GCI requires geometrically self-similar grids with an unambiguous
-        refinement ratio. Scaling node count per direction shrinks every cell by the same factor,
-        so the representative cell size is well defined. On an unstructured mesh, "refine by 1.5x"
-        is fuzzy: the mesher redistributes cells non-uniformly and the effective ratio varies
-        spatially. A secondary reason is shock capture. Quad faces aligned with the flow keep the
-        shock crisp, whereas a shock cutting diagonally across skewed cells is smeared over a wider
-        band, which blurs the shock position, the headline measured quantity.
+        <b>Structured</b> because the grid convergence method requires the meshes to be
+        geometrically similar with a clear, uniform refinement factor. Scaling the node count in
+        each direction shrinks every cell by the same amount, so cell size is unambiguous. On an
+        unstructured mesh "refine by 1.5x" is fuzzy, because the mesher redistributes cells
+        unevenly and the effective factor varies from place to place. There is also a shock-capture
+        reason: cell faces aligned with the flow keep the shock crisp, whereas a shock cutting
+        diagonally across skewed cells gets smeared over a wider band, which blurs the shock
+        position, the main quantity being measured.
       </p>
       <p>
-        <b>r = 1.5</b> because the closed-form observed-order formula assumes a constant refinement
-        ratio, and root-2 cannot be hit exactly with integer node counts. Going 160, 226, 320 gives
-        actual ratios of 1.4125 and 1.4159, which drift. Using 160, 240, 360 gives exactly 1.5 at
-        every level, so the closed form is legitimately valid as written. It also produces larger
-        grid separation, which gives a cleaner signal for the observed order against iterative
-        noise.
+        <b>A factor of 1.5</b> because the formula for observed order assumes the refinement factor
+        is identical between every pair of meshes, and root-2 cannot be hit exactly with whole
+        numbers of cells. Going 160, 226, 320 gives actual factors of 1.4125 and 1.4159, which
+        drift apart. Going 160, 240, 360 gives exactly 1.5 every time. The larger gap between
+        meshes also produces a cleaner signal against iterative noise.
       </p>
     </details>
 
     <h3>Solver</h3>
     <p>
-      Coupled density-based implicit solver, chosen because the entire problem is a shock and a
-      density-based scheme handles the tight pressure-density-velocity coupling across a
-      discontinuity. Roe flux-difference splitting, second-order discretisation throughout,
-      Sutherland viscosity, and low-Mach preconditioning, which is necessary because the flow spans
-      M = 0.46 to above M = 1.
+      The case was run with a coupled density-based implicit solver, second-order accurate
+      throughout, using Roe flux-difference splitting, Sutherland's law for viscosity, and low-Mach
+      preconditioning.
     </p>
+
+    <details>
+      <summary>What those solver settings are, in plain terms</summary>
+      <p>
+        <b>Coupled density-based solver.</b> Pressure-based solvers handle the governing equations
+        one after another and suit low-speed flow. Density-based solvers solve mass, momentum, and
+        energy together as one system, which is what is needed when density, pressure, and velocity
+        are all strongly linked, as they are across a shock. This entire problem is a shock.
+      </p>
+      <p>
+        <b>Roe flux-difference splitting.</b> A scheme for computing how much mass, momentum, and
+        energy crosses each cell face. It is built around the physics of waves traveling through
+        the fluid, which makes it good at capturing shocks sharply instead of smearing them.
+      </p>
+      <p>
+        <b>Sutherland's law.</b> Air becomes more viscous as it heats up, and Sutherland's law is
+        the standard formula relating the two. Temperature varies substantially through this flow,
+        so holding viscosity constant would be inaccurate.
+      </p>
+      <p>
+        <b>Low-Mach preconditioning.</b> Density-based solvers converge poorly where the flow is
+        much slower than the speed of sound. This flow spans M = 0.46 to above M = 1, so the slower
+        regions would otherwise stall convergence. Preconditioning rescales the equations to fix
+        that without changing the converged answer.
+      </p>
+    </details>
+
     <p>
-      Solver defaults were retained until they demonstrably failed. The automatic CFL controller
-      ramped to about 17,000, at which point the linear solver began rejecting solves and
-      repeatedly halving CFL, and residuals stopped converging. Capping maximum CFL at 50 dropped
-      all residuals by roughly an order of magnitude and stabilised the run. This was a documented
-      intervention after an observed failure rather than pre-emptive tuning, and CFL affects only
-      the path to convergence and not the converged answer, since the pseudo-time terms vanish at
-      steady state.
+      Solver defaults were kept until they demonstrably failed. The automatic CFL controller, which
+      governs how aggressively the solver advances toward a steady answer, ramped to about 17,000.
+      At that point the linear solver started rejecting steps and repeatedly halving CFL, and the
+      residuals stopped falling. Capping the maximum CFL at 50 dropped every residual by roughly a
+      factor of ten and stabilized the run. This was an intervention made after an observed failure
+      rather than tuning applied in advance, and CFL affects only how the solution reaches steady
+      state, not what the steady answer is.
     </p>
 
     <h2>Verification</h2>
@@ -268,27 +324,27 @@
     <h3>Iterative convergence</h3>
     <p>
       Mass is conserved to 2.8 &times; 10<sup>-5</sup> % on the fine mesh, with residuals flat.
-      Mass flow also sits at 99.08% of the ideal choked value, and that 0.9% deficit is physically
-      correct rather than an error: the boundary layer occupies part of the throat and reduces the
-      effective area below the geometric area. A result of exactly 100% would indicate the boundary
-      layer was missing.
+      Computed mass flow reaches 99.08% of the ideal value for a choked throat. That 0.9% shortfall
+      is physically correct rather than an error, because the boundary layer occupies part of the
+      throat and leaves the flow slightly less area than the geometry suggests. Hitting exactly 100%
+      would mean the boundary layer was missing.
     </p>
     <p>
-      One methodological correction is worth reporting. The protocol initially specified a fixed
-      5000 iterations on every mesh for comparability. That was insufficient for the fine mesh,
-      which was still showing residual excursions and needed 6500. Identical iteration count does
-      not mean identical convergence state, and Richardson extrapolation assumes iterative error is
-      negligible against discretisation error. The defensible criterion is a convergence level
-      applied per mesh, with iteration count reported as an outcome rather than a setting.
+      One methodological correction is worth reporting. The original plan fixed every mesh at 5000
+      iterations so the three runs would be comparable. That was not enough for the fine mesh, which
+      was still showing residual spikes and needed 6500. Running the same number of iterations does
+      not mean the runs reached the same level of convergence, and the grid convergence method
+      assumes leftover iterative error is negligible compared with mesh error. The defensible
+      approach is to converge each mesh to a target level and report the iteration count as a result
+      rather than fixing it as a setting.
     </p>
     <p>
-      The coarse mesh settled into a limit cycle rather than converging. Refinement eliminated it
-      entirely, which identified it as numerical shock jitter, the shock oscillating between
-      adjacent cell faces on a mesh whose streamwise cells were 0.079 h, rather than the physical
-      self-excited unsteadiness this diffuser is known for. Distinguishing the two mattered: the
-      coarse mesh showed constant-amplitude oscillation with no downward trend, where more
-      iterations would not have helped, while the fine mesh showed decaying excursions on a
-      downward trend, where they did.
+      The coarse mesh also never fully settled. Its residuals dropped and then oscillated at a
+      steady amplitude instead of continuing down. Refining the mesh removed the oscillation
+      completely, which identified the cause: on the coarse mesh the shock was jumping back and
+      forth between neighboring cells because the cells were too large to place it precisely. This
+      diffuser is known to have genuine physical shock oscillation, so the distinction mattered.
+      A physical oscillation would not disappear just because the mesh improved.
     </p>
 
     <figure>
@@ -300,147 +356,192 @@
     <h3>Grid convergence</h3>
     <p>
       Shock position leads this section. It is the quantity the experiment measures, it is the
-      documented RANS failure mode for this case, and it is the engineering-relevant result, since
+      documented weak point of RANS for this case, and it is the engineering-relevant result, since
       in a nozzle the shock location determines where the flow separates.
     </p>
     <p>
-      Across the family on the upper wall, shock position went 1.3719, 1.4117, 1.4205, extrapolating
-      to <b>1.4230</b>. The increments shrank from +0.0398 to +0.0088 h, a ratio of 0.22, which is
-      the asymptotic behaviour the method requires. If the increments were not shrinking, the
-      solution would not be converging.
+      Across the three meshes the shock sat at 1.3719, then 1.4117, then 1.4205 x/h on the upper
+      wall. The steps between meshes shrank from +0.0398 to +0.0088 h, a factor of about four and a
+      half. Shrinking steps are what convergence looks like: the answer is still moving, but by less
+      each time, which makes it possible to estimate where it is heading.
+    </p>
+    <p>
+      That estimate comes from assuming the error falls as a power of cell size:
+    </p>
+    <p style="font-family:var(--mono);font-size:15px;text-align:center;color:var(--text)">
+      <i>f</i>(<i>h</i>) = <i>f</i><sub>exact</sub> + <i>C</i> <i>h</i><sup><i>p</i></sup>
+    </p>
+    <p>
+      where <i>f</i>(<i>h</i>) is the answer computed on a mesh of cell size <i>h</i>,
+      <i>f</i><sub>exact</sub> is what an infinitely fine mesh would give, <i>C</i> is a constant,
+      and <i>p</i> is the observed order, meaning how fast the error shrinks as cells get smaller.
+      Three unknowns, which is why the study uses three meshes. Writing <i>f</i><sub>1</sub> for
+      fine, <i>f</i><sub>2</sub> for medium, <i>f</i><sub>3</sub> for coarse, and <i>r</i> = 1.5 for
+      the refinement factor:
+    </p>
+    <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--text);line-height:2.2">
+      <i>p</i> = ln( |(<i>f</i><sub>3</sub> &minus; <i>f</i><sub>2</sub>) / (<i>f</i><sub>2</sub> &minus; <i>f</i><sub>1</sub>)| ) / ln <i>r</i><br>
+      <i>f</i><sub>exact</sub> = <i>f</i><sub>1</sub> + (<i>f</i><sub>1</sub> &minus; <i>f</i><sub>2</sub>) / (<i>r</i><sup><i>p</i></sup> &minus; 1)<br>
+      GCI = <i>F</i><sub>s</sub> |(<i>f</i><sub>2</sub> &minus; <i>f</i><sub>1</sub>) / <i>f</i><sub>1</sub>| / (<i>r</i><sup><i>p</i></sup> &minus; 1)
+    </p>
+    <p>
+      The Grid Convergence Index (GCI) is the number that matters. It is an uncertainty band rather
+      than an error: it says the true mesh-independent answer lies within that percentage of the
+      fine-mesh result. <i>F</i><sub>s</sub> is a safety factor, 1.25 for a three-mesh study, which
+      makes the band deliberately conservative. Applied to shock position on the upper wall, the
+      observed order comes out at <i>p</i> = 3.72, the extrapolated value at <b>1.4230 x/h</b>, and
+      the GCI at <b>0.220%</b>.
+    </p>
+
+    <details>
+      <summary>Worked example, and the asymptotic range check</summary>
+      <pre>f3 = 1.3719 (coarse), f2 = 1.4117 (medium), f1 = 1.4205 (fine)
+
+(f3 - f2) = -0.0398
+(f2 - f1) = -0.0088
+ratio     = 4.5227
+
+p         = ln(4.5227)/ln(1.5) = 3.7221
+r^p       = 1.5^3.7221 = 4.5193
+
+f_exact   = 1.4205 + 0.0088/3.5193 = 1.4230
+GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
+      <p>
+        There is one more check. The power law above only holds if all three meshes are already
+        fine enough for a single leading error term to dominate, a state called the asymptotic
+        range. The test for it compares the two mesh pairs:
+      </p>
+      <pre>R = GCI_32 / (r^p * GCI_21),   should be close to 1</pre>
+      <p>
+        Shock position gives R = 1.006. NASA's own worked example describes 1.002 as well within
+        the asymptotic range, so 1.006 says the extrapolation is trustworthy rather than a hopeful
+        curve fit. Full method description:
+        <a href="https://www.grc.nasa.gov/www/wind/valid/tutorial/spatconv.html">NASA spatial
+        convergence tutorial</a>.
+      </p>
+    </details>
+
+    <p>
+      Running the same procedure on every quantity of interest gave three distinct behaviors, and
+      each has a physical explanation.
     </p>
 
     <table>
       <thead>
-        <tr><th>Quantity</th><th>Observed order p</th><th>GCI (fine)</th><th>Asymptotic ratio</th><th>Behaviour</th></tr>
+        <tr><th>Quantity</th><th>Observed order p</th><th>GCI (fine)</th><th>Asymptotic ratio R</th></tr>
       </thead>
       <tbody>
-        <tr class="highlight"><td>Shock position, upper wall</td><td>3.72</td><td>0.220%</td><td>1.006</td><td>feature location</td></tr>
-        <tr><td>Shock position, lower wall</td><td>3.72</td><td>0.217%</td><td>1.006</td><td>feature location</td></tr>
-        <tr><td>Peak Mach (field)</td><td>2.39</td><td>0.089%</td><td>1.001</td><td>smooth</td></tr>
-        <tr><td>Mass flow</td><td>0.53</td><td>0.118%</td><td>1.000</td><td>boundary-layer driven</td></tr>
-        <tr><td>Inlet Mach</td><td>0.48</td><td>0.189%</td><td>1.000</td><td>boundary-layer driven</td></tr>
-        <tr><td>Wall pressure minimum</td><td>&middot;</td><td>&middot;</td><td>&middot;</td><td>oscillatory, no valid GCI</td></tr>
-        <tr><td>Peak isentropic wall Mach</td><td>&middot;</td><td>&middot;</td><td>&middot;</td><td>oscillatory, no valid GCI</td></tr>
-        <tr><td>Separation bubble length</td><td>&middot;</td><td>&middot;</td><td>&middot;</td><td>oscillatory, no valid GCI</td></tr>
+        <tr class="highlight"><td>Shock position, upper wall</td><td>3.72</td><td>0.220%</td><td>1.006</td></tr>
+        <tr><td>Shock position, lower wall</td><td>3.72</td><td>0.217%</td><td>1.006</td></tr>
+        <tr><td>Peak Mach in the field</td><td>2.39</td><td>0.089%</td><td>1.001</td></tr>
+        <tr><td>Mass flow</td><td>0.53</td><td>0.118%</td><td>1.000</td></tr>
+        <tr><td>Inlet Mach</td><td>0.48</td><td>0.189%</td><td>1.000</td></tr>
       </tbody>
     </table>
 
-    <details>
-      <summary>The three formulas, with a worked example</summary>
-      <p>
-        Richardson extrapolation assumes the computed answer approaches the exact one as a power
-        law in cell size: f(h) = f_exact + C&middot;h^p. There are three unknowns (f_exact, C, and
-        p), which is why the study uses three meshes.
-      </p>
-      <pre>Observed order:     p = ln( |(f3 - f2)/(f2 - f1)| ) / ln(r)
-Extrapolated:       f_exact = f1 + (f1 - f2)/(r^p - 1)
-Uncertainty:        GCI_fine = Fs * |(f2 - f1)/f1| / (r^p - 1)
-Asymptotic check:   R = GCI_32 / (r^p * GCI_21),  should be near 1</pre>
-      <p>
-        f1 is the fine mesh, f2 medium, f3 coarse. r is the refinement ratio, defined on cell edge
-        length rather than cell count. Fs is a safety factor, 1.25 for a three-grid study.
-      </p>
-      <p>Worked through for shock position on the upper wall:</p>
-      <pre>f3 = 1.3719, f2 = 1.4117, f1 = 1.4205
-(f3 - f2) = -0.0398,  (f2 - f1) = -0.0088
-ratio = 4.5227
-p = ln(4.5227)/ln(1.5) = 3.7221
-
-r^p = 1.5^3.7221 = 4.5193
-f_exact = 1.4205 + 0.0088/3.5193 = 1.4230
-
-GCI = 1.25 * (0.0088/1.4205) / 3.5193 = 0.00220 = 0.220%</pre>
-      <p>
-        GCI is an uncertainty band rather than an error. It states that the true grid-independent
-        value lies within 0.220% of the fine-mesh result, with the safety factor making it
-        deliberately conservative.
-      </p>
-    </details>
+    <p>
+      <b>Smooth quantities converge close to the expected rate.</b> The solver is second-order
+      accurate, and peak Mach in the field comes out at p = 2.39, near that. This is the baseline
+      the others should be read against.
+    </p>
+    <p>
+      <b>Shock position converges faster than theory predicts</b>, at p = 3.72. That is above formal
+      second order, which sounds wrong but is known behavior for the location of a sharp feature: a
+      captured shock snaps toward its converged position faster than smooth-error theory expects.
+      The asymptotic ratio of 1.006 confirms the extrapolation holds regardless.
+    </p>
+    <p>
+      <b>Boundary-layer-driven quantities converge slowly</b>, at p near 0.5 for mass flow and inlet
+      Mach. Both are set by how much of the throat the boundary layer blocks, and boundary layers
+      resolve more slowly than the free stream. Their uncertainty bands stay small, so this is not a
+      practical problem, but second-order behavior cannot be claimed for them.
+    </p>
+    <p>
+      The general lesson is that observed order is a property of the quantity being measured, not
+      just of the solver.
+    </p>
+    <p>
+      Three further quantities failed to converge at all: minimum wall pressure, peak isentropic
+      wall Mach, and separation bubble length. For these the answer moved one direction from coarse
+      to medium and then reversed from medium to fine. When that happens the method breaks down
+      mathematically and no valid uncertainty can be computed, so they are reported as ranges rather
+      than values. Why they failed turns out to be interesting.
+    </p>
 
     <h3>The discontinuity caveat, and why the data resolves it</h3>
     <p>
-      NASA's V&amp;V guidance for this archive states that where shocks and other discontinuities
-      are present, Richardson extrapolation is invalid in the region of the discontinuity, though
-      it is still felt to apply to solution functionals computed from the entire flow field. The
-      reason is that Richardson rests on a Taylor series expansion, and a Taylor series does not
-      exist across a discontinuity.
+      NASA's guidance for this archive states that where shocks are present, this extrapolation is
+      invalid in the region of the discontinuity itself, though it still applies to quantities
+      computed from the whole flow field. The reason is that the method rests on a Taylor series
+      expansion, and a Taylor series does not exist across a discontinuity.
     </p>
     <p>
-      The caveat is specifically about applying Richardson pointwise, extrapolating a field value
-      at a grid point inside the shock. Shock position is not a pointwise field value. It is a
-      derived scalar, the location of a feature extracted from the entire wall pressure
-      distribution, which places it on the solution-functional side of that distinction.
+      The caveat is specifically about applying the method pointwise, meaning extrapolating a value
+      at a single grid point sitting inside the shock. Shock position is not that. It is a location
+      extracted from the entire wall pressure distribution, which puts it on the whole-field side of
+      the distinction.
     </p>
     <p>
-      The data demonstrates exactly that split, and it is worth presenting as a finding rather than
-      a footnote:
+      What makes this more than an argument is that the data splits exactly along that line.
     </p>
 
     <table>
       <thead><tr><th>Quantity</th><th>What it is</th><th>Result</th></tr></thead>
       <tbody>
-        <tr><td>Wall pressure minimum</td><td>a pointwise value at the shock</td><td>oscillatory, no GCI</td></tr>
-        <tr><td>Peak isentropic wall Mach</td><td>derived from that same pointwise value</td><td>oscillatory, no GCI</td></tr>
-        <tr><td>Shock position</td><td>feature location from the full distribution</td><td>monotonic, R = 1.006</td></tr>
-        <tr><td>Peak Mach (field)</td><td>a smooth-region value</td><td>monotonic, R = 1.001</td></tr>
+        <tr><td>Minimum wall pressure</td><td>a single value at the shock</td><td>oscillatory, no valid GCI</td></tr>
+        <tr><td>Peak isentropic wall Mach</td><td>derived from that same single value</td><td>oscillatory, no valid GCI</td></tr>
+        <tr><td>Shock position</td><td>a location from the full distribution</td><td>converged, R = 1.006</td></tr>
+        <tr><td>Peak Mach in the field</td><td>a value from a smooth region</td><td>converged, R = 1.001</td></tr>
       </tbody>
     </table>
 
     <p>
-      The quantities that failed to converge are precisely the pointwise-at-the-shock values the
-      caveat concerns, and the quantities that converged are the ones it exempts. The theoretical
-      limit was not assumed, it was observed. Three separate quantities evaluated inside the
-      discontinuity all refused to produce a valid GCI, while feature-location and smooth-region
-      quantities converged cleanly with asymptotic ratios within 0.6% of unity.
+      The quantities that failed are precisely the pointwise-at-the-shock values the caveat
+      concerns, and the ones that converged are the ones it exempts. The theoretical limit was not
+      assumed here, it was observed. Three separate quantities evaluated inside the discontinuity
+      all refused to produce a valid result, while feature-location and smooth-region quantities
+      converged cleanly with asymptotic ratios within 0.6% of one.
     </p>
     <p>
-      The empirical check is the decisive argument here. NASA prescribes the asymptotic ratio as
-      the test of whether the power law actually holds across the family. Shock position gives
-      1.006, and their own worked example describes 1.002 as well within the asymptotic range. So
-      the theory raises a caution, the prescribed check passes, and the quantities theory says
-      should fail did fail.
-    </p>
-    <p>
-      One honest qualification: separation bubble length is also a feature measure and it also
-      oscillated, so the pointwise-versus-feature distinction is not a clean law. That case has a
-      simpler explanation, which is that the bubble is only one to two cells wide on every mesh in
-      the family, so it is under-resolved rather than mathematically excluded.
+      Separation bubble length is the exception that keeps this from being a clean rule. It is also
+      a feature measure, and it also oscillated. The likely reason is simpler than the mathematical
+      one: the bubble is only one to two cells long on every mesh in the family, so it is
+      under-resolved rather than mathematically excluded.
     </p>
 
-    <h3>Three distinct convergence behaviours</h3>
-    <p>
-      The observed order came out differently for different quantities, and each difference has a
-      physical explanation.
-    </p>
-    <p>
-      <b>Smooth field quantities converge near formal second order.</b> Peak Mach gives p = 2.39
-      against a formal 2, which is the baseline the others should be read against.
-    </p>
-    <p>
-      <b>The discontinuity-located quantity is anomalous but well behaved.</b> Shock position gives
-      p = 3.72, above formal order. A captured discontinuity snaps toward its converged location
-      faster than smooth-error theory predicts, and the asymptotic ratio validates the
-      extrapolation regardless.
-    </p>
-    <p>
-      <b>Boundary-layer-driven quantities converge slowly.</b> Mass flow and inlet Mach give p near
-      0.5, because both are set by displacement thickness at the throat and boundary layers resolve
-      more slowly than the inviscid core. Their GCIs remain small, so practical uncertainty is
-      fine, but second-order behaviour cannot be claimed for them.
-    </p>
-    <p>
-      The general lesson is that observed order is a property of the quantity, not just of the
-      solver.
-    </p>
-
-    <div class="fig-placeholder">[ figure: three-mesh grid convergence overlay with zoomed shock-region panel ]</div>
+    <div class="fig-placeholder">[ figure: shock position plotted against cell size for all three meshes, with the extrapolated value marked at zero cell size ]</div>
 
     <h2>Validation</h2>
 
     <h3>Wall static pressure</h3>
+    <p>
+      Wall pressure is the primary experimental measurement. Comparing computed against measured
+      pressure at each tap location gives an RMS error, which is the typical size of the
+      disagreement across all measurement points.
+    </p>
+
+    <details>
+      <summary>How the error is computed</summary>
+      <p>
+        The CFD produces pressure at several hundred points along each wall; the experiment has
+        roughly 35 pressure taps. The two sets do not line up, so the CFD curve is interpolated onto
+        the experimental tap locations. That direction matters. CFD data is dense and smooth, so
+        interpolating it introduces almost nothing, whereas interpolating the sparse experimental
+        data would invent measurements that were never taken.
+      </p>
+      <p>The error at each tap, and the RMS across all of them:</p>
+      <pre>e_i  = (p/P0)_CFD,i - (p/P0)_exp,i
+
+RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
+      <p>
+        Squaring before averaging stops overshoots and undershoots from canceling each other out,
+        and weights large errors more heavily than small ones. The percentage version divides each
+        error by that point's own experimental value before squaring.
+      </p>
+    </details>
+
     <table>
-      <thead><tr><th>Region</th><th>Top wall RMS</th><th>Bottom wall RMS</th></tr></thead>
+      <thead><tr><th>Region</th><th>Upper wall RMS</th><th>Lower wall RMS</th></tr></thead>
       <tbody>
         <tr><td>Upstream of shock (x/h &lt; 1.2)</td><td>3.25%</td><td>2.18%</td></tr>
         <tr class="highlight"><td>Shock region (1.2 to 2.0)</td><td>12.60%</td><td>11.45%</td></tr>
@@ -448,19 +549,21 @@ GCI = 1.25 * (0.0088/1.4205) / 3.5193 = 0.00220 = 0.220%</pre>
         <tr><td>Overall</td><td>4.86%</td><td>4.22%</td></tr>
       </tbody>
     </table>
+
     <p>
-      The error is positional, not amplitude. The pressure jump has the correct magnitude, it
-      simply happens about 0.14 throat-heights too far downstream. Downstream diffuser recovery is
-      captured to 0.26%, which is essentially exact, and the regional split turns a single number
-      into a diagnosis: the model is nearly perfect where the flow is well behaved and fails in one
-      specific place.
+      Splitting the error by region turns a single number into a diagnosis. The model is close to
+      exact where the flow is well behaved, recovering the downstream diffuser pressure to 0.26%,
+      and nearly all of the disagreement sits in the shock region. The error there is positional
+      rather than in magnitude: the pressure jump has the right size, it just happens about 0.14
+      throat-heights too far downstream.
     </p>
     <p>
-      Global RMS increases with refinement, going 4.36, 4.84, 4.86% on the top wall. Out of context
-      that looks like a defect. It is the study's central evidence. A coarse mesh smears the shock,
-      which accidentally overlaps the experimental data slightly better, and sharpening the shock
-      reveals the true model error. This trend should never be presented without the regional
-      breakdown, which shows upstream and downstream errors flat or improving throughout.
+      The overall RMS gets slightly worse as the mesh refines, going 4.36, 4.84, 4.86% on the upper
+      wall. Out of context that looks like a defect, and it is actually the study's central
+      evidence. A coarse mesh smears the shock over a wider band, which happens to overlap the
+      experimental data slightly better. Sharpening the shock removes that accidental overlap and
+      exposes the real model error. This trend should never be shown without the regional breakdown,
+      which has upstream and downstream errors flat or improving throughout.
     </p>
 
     <div class="fig-placeholder">[ figure: wall pressure vs experiment, with residual panel ]</div>
@@ -469,27 +572,23 @@ GCI = 1.25 * (0.0088/1.4205) / 3.5193 = 0.00220 = 0.220%</pre>
     <table>
       <thead><tr><th></th><th>Value</th></tr></thead>
       <tbody>
-        <tr><td>Numerical uncertainty (GCI, shock position)</td><td>0.22%</td></tr>
+        <tr><td>Numerical uncertainty (GCI, shock position)</td><td>0.220%</td></tr>
         <tr><td>Disagreement with experiment</td><td>11.17%</td></tr>
-        <tr class="highlight"><td>Ratio</td><td>about 50x</td></tr>
+        <tr class="highlight"><td>Ratio</td><td>50.8&times;</td></tr>
       </tbody>
     </table>
     <p>
-      The disagreement is roughly fifty times larger than anything mesh refinement could remove,
-      and it grew with refinement, going 7.18%, 10.29%, 11.17%. That is modelling error. The
-      verification study is what makes the claim defensible rather than an assertion, because
-      nobody can respond "refine further" when the study has already bounded what refinement could
-      buy.
+      The disagreement is nearly 51 times larger than anything mesh refinement could remove, and it
+      grew with refinement, going 7.18%, 10.29%, 11.17%. That is modeling error. The verification
+      study is what makes the claim defensible rather than an assertion, because nobody can respond
+      "refine further" when the study has already bounded what refining further could buy.
     </p>
 
     <h3>Velocity profiles</h3>
     <p>
-      Four stations at x/h = 1.729, 2.882, 4.611 and 6.340, with 116 experimental points in total.
-      An unplanned check passed along the way: the computed upper-wall y/h at each station, taken
-      from the spline geometry, matches the outermost experimental measurement point at all four
-      stations (1.0611 against 1.059, 1.1797 against 1.179, 1.4014 against 1.403, 1.4986 against
-      1.499). That independently confirms both the geometry reconstruction and the normalisation
-      convention.
+      The archive also provides measured velocity profiles at four stations downstream of the shock,
+      at x/h = 1.729, 2.882, 4.611 and 6.340, giving a second and completely independent quantity to
+      validate against.
     </p>
 
     <table>
@@ -503,56 +602,76 @@ GCI = 1.25 * (0.0088/1.4205) / 3.5193 = 0.00220 = 0.220%</pre>
     </table>
 
     <p>
-      Two observations that should not be glossed over. Profile errors of 17 to 24% are much larger
-      than the wall pressure errors of 4 to 5%, because velocity profiles are a harsher test, and
-      the archive itself attributes downstream profile disagreement to 3D effects the 2D model
-      cannot capture. And both models are biased low by 15 to 20 m/s at all downstream stations,
-      indicating over-predicted blockage there. That is the opposite direction from the
-      under-predicted pre-shock blockage that the shock-position mechanism requires. Different
-      regions and different mechanisms, so not a contradiction, but it needs stating rather than
-      smoothing over.
+      Velocity profiles are a harsher test than wall pressure, with errors of 17 to 24% against 4 to
+      5%. The archive attributes much of the downstream profile disagreement to three dimensional
+      effects, which a 2D model cannot reproduce.
+    </p>
+    <p>
+      A systematic pattern also shows up in the bias column. Both models run slow by 15 to 20 m/s at
+      every downstream station, meaning both over-predict how much of the duct the boundary layer
+      blocks in the recovery region. That points the opposite way from the shock position result,
+      where the models under-predict blockage upstream of the shock. Different regions with
+      different mechanisms, so the two are not in conflict, but the inconsistency is real and worth
+      stating rather than smoothing over.
     </p>
 
     <div class="fig-placeholder">[ figure: four-panel velocity profiles, SST and SA against experiment ]</div>
 
     <h3>Why the shock sits downstream</h3>
     <p>
-      Shock position in a duct is set by the balance between effective flow area, meaning geometric
-      area minus boundary layer displacement thickness, and back pressure. Under-predicting
-      displacement thickness makes the effective area too large, so the flow expands further before
-      it must shock.
+      Where the shock sits in a duct depends on the balance between back pressure and the flow area
+      actually available. That available area is not the geometric area, because the slow-moving
+      boundary layer along each wall effectively blocks part of the duct. If a model under-predicts
+      how much the boundary layer blocks, the flow sees more room than it really has, keeps
+      accelerating for longer, and shocks further downstream.
     </p>
     <p>
-      Four modelling assumptions all bias in the same direction. The RANS eddy-viscosity closure
-      ties turbulent stress to local mean strain and presumes local equilibrium, but through a
-      shock the compression is rapid and turbulence lags, so the model over-predicts mixing in the
-      interaction and keeps the boundary layer too thin and too resistant to separation. The 2D
-      assumption neglects sidewall boundary layers, and the tunnel sidewalls were about four
-      throat-heights apart, each carrying a boundary layer contributing blockage the model cannot
-      represent. The uniform inflow prescribed by the archive means boundary layers grow from zero
-      over the inlet-to-throat run and are thinner at the throat than in the experiment. And a
-      steady solution is not the same quantity as the time-mean of the self-excited shock
-      oscillation the experiment measured.
+      Four separate modeling assumptions all push in that same direction.
     </p>
     <p>
-      The sensitivity involved is worth quantifying. Placing the shock at the experimental station
-      requires the effective area at x/h = 1.41 to be smaller by 0.330 mm, which is a displacement
-      thickness larger by about 0.165 mm per wall, or 0.375% of throat height per wall. A sub-0.2
-      mm deficit per wall produces a 10% shock position error, because the area variation near the
-      throat is gentle. That single number explains why every RANS code in the archive shows the
-      same downstream bias.
+      The first is the turbulence model itself. RANS models assume the turbulence at any point is in
+      balance with the flow conditions there. Passing through a shock, conditions change almost
+      instantly while the turbulence takes time to respond, so that assumption breaks down. The
+      model behaves as though the turbulence has already adjusted, which makes it over-predict
+      mixing through the shock. Extra mixing drags fast-moving air down toward the wall, keeping the
+      boundary layer thinner and more resistant to separating than it really is, so it blocks less
+      of the duct.
     </p>
     <p>
-      This remains an inference. All four experimental velocity profile stations are downstream of
-      the shock, so pre-shock displacement thickness cannot be measured directly from the available
-      data.
+      The second is that the simulation is 2D. In the physical wind tunnel the side walls sit about
+      four throat-heights apart and each carries its own boundary layer, adding blockage a 2D model
+      has no way to include.
+    </p>
+    <p>
+      Third, the case definition specifies uniform inflow with no boundary layer already present at
+      the inlet. In the simulation the boundary layers start from nothing and grow over the run to
+      the throat, so they arrive thinner than in the experiment.
+    </p>
+    <p>
+      Fourth, this is a steady simulation of a flow the original experiment found to oscillate on
+      its own. The measured shock position is a time average of a shock sweeping back and forth,
+      which is not the same quantity as a steady solution.
+    </p>
+    <p>
+      The sensitivity involved is worth putting a number on. Moving the shock from where the
+      simulation puts it to where the experiment measured it requires the effective flow area to
+      shrink by only 0.330 mm, about 0.165 mm per wall. Such a tiny change moves the shock so far
+      because the duct barely changes shape in this region: near the throat the cross section opens
+      up very gradually with distance, so recovering a small area deficit takes a long streamwise
+      run. A sub-0.2 mm error per wall in boundary layer thickness therefore becomes a 10% error in
+      shock position.
+    </p>
+    <p>
+      This mechanism remains an inference. All four experimental velocity profile stations sit
+      downstream of the shock, so boundary layer thickness upstream of it cannot be measured from
+      the available data.
     </p>
 
     <h2>Turbulence model comparison</h2>
     <p>
-      Identical mesh, identical boundary conditions, identical solver settings. The only change is
-      the closure. Inlet turbulent viscosity ratio was matched at 10 for both, since SA has no k
-      equation and turbulence intensity is unused.
+      Same mesh, same boundary conditions, same solver settings. The only thing changed between the
+      two runs is the turbulence model, switching from k-omega SST to Spalart-Allmaras. Inlet
+      turbulent viscosity ratio was matched at 10 for both.
     </p>
 
     <table>
@@ -561,41 +680,48 @@ GCI = 1.25 * (0.0088/1.4205) / 3.5193 = 0.00220 = 0.220%</pre>
         <tr><td>Shock position x/h, upper wall</td><td>1.4205</td><td>1.5621</td><td>1.280</td></tr>
         <tr><td>Shock position x/h, lower wall</td><td>1.4414</td><td>1.6176</td><td>1.271</td></tr>
         <tr><td>Separation bubble length</td><td>0.106 h</td><td>0.295 h</td><td>&middot;</td></tr>
-        <tr class="highlight"><td>Peak Mach at x/h = 1.729</td><td>0.905</td><td>1.278</td><td>0.924</td></tr>
-        <tr><td>Wall pressure RMS, top</td><td>4.86%</td><td>7.46%</td><td>&middot;</td></tr>
+        <tr class="highlight"><td>Core Mach at first profile station (x/h = 1.729)</td><td>0.905</td><td>1.278</td><td>0.924</td></tr>
+        <tr><td>Wall pressure RMS, upper wall</td><td>4.86%</td><td>7.46%</td><td>&middot;</td></tr>
       </tbody>
     </table>
 
     <p>
-      SA places the shock 0.1416 h further downstream than SST, and the difference is confirmed on
-      both the medium and fine meshes (+0.1062 h and +0.1416 h). That exceeds the numerical
-      uncertainty of either model by an order of magnitude, so the difference is real rather than
-      grid scatter. The gap is also roughly the size of SST's own remaining error against
-      experiment, which means turbulence closure alone accounts for about half the total
-      discrepancy.
+      SA places the shock 0.1416 h further downstream than SST, and the same gap appears on both the
+      medium and fine meshes (+0.1062 h and +0.1416 h). That is an order of magnitude larger than
+      the numerical uncertainty of either model, so the difference between them is real rather than
+      mesh noise.
     </p>
     <p>
-      An internal consistency check supports the comparison: upstream errors are essentially
-      identical between the models, 3.238% against 3.248% on the top wall. That region is
-      inviscid-dominated, so closure should not matter there, and it does not. The two runs differ
-      only in the closure.
+      The size of that gap is the useful part. SST's own shock sits 0.1405 h away from the
+      experimental position, and switching turbulence models moves the shock by 0.1416 h, almost
+      exactly the same amount. Changing nothing but the turbulence model therefore shifts the answer
+      by as much as the entire remaining error in the better of the two models. That makes the
+      turbulence model responsible for roughly as much error as the other three assumptions
+      combined, which is where the estimate of about half comes from.
     </p>
     <p>
-      There is an apparent paradox in the separation result that is worth resolving rather than
-      leaving. SA produces a bubble almost three times longer than SST yet places the shock further
-      downstream, where the naive expectation is that more separation means more blockage and
-      therefore an upstream shock. The resolution is sequencing. SA under-predicts boundary layer
-      thickening in the accelerating pre-shock region, because it lacks SST's shear-stress-transport
-      limiter capping eddy viscosity in adverse pressure gradients. Lower pre-shock blockage means
-      a larger effective area, so the flow expands further before shocking, reaching peak Mach
-      1.280 against SST's 1.252, and the shock lands downstream at greater strength. The larger
-      bubble is a consequence of that stronger shock, not the cause of its position.
+      An internal check supports the comparison. Upstream of the shock the two models give
+      essentially identical errors, 3.238% against 3.248% on the upper wall. That region is
+      dominated by inviscid behavior where the turbulence model should not matter much, and it does
+      not, which confirms the two runs really do differ only in the model.
     </p>
     <p>
-      The velocity profiles produced the more interesting result. At x/h = 1.729 the experiment and
-      SST are both subsonic, at M = 0.924 and 0.905. <b>SA is still supersonic at M = 1.278.</b> It
-      is not merely less accurate at this station, it is qualitatively wrong: it predicts
-      supersonic flow where the experiment measured subsonic.
+      The separation result looks backwards at first. SA produces a bubble almost three times longer
+      than SST yet places the shock further downstream, when more separation should mean more
+      blockage and therefore an earlier shock. The resolution is the order in which things happen.
+      SA under-predicts boundary layer growth in the accelerating region ahead of the shock, because
+      it lacks the limiter SST applies to cap turbulent viscosity in adverse pressure gradients.
+      Less blockage before the shock means more effective area, so the flow keeps accelerating and
+      reaches a higher Mach number, 1.280 against SST's 1.252, before it shocks. A shock further
+      downstream at higher Mach is a stronger shock, and a stronger shock separates the boundary
+      layer more severely. The bigger bubble is the result of where the shock ended up, not the
+      cause of it.
+    </p>
+    <p>
+      The velocity profiles produced the more striking result. At the first station the experiment
+      and SST are both subsonic, at M = 0.924 and 0.905. <b>SA is still supersonic there, at
+      M = 1.278.</b> It is not simply less accurate at this station, it is qualitatively wrong,
+      predicting supersonic flow where the experiment measured subsonic.
     </p>
     <p>
       That leads to the methodological point of the whole study. Wall pressure alone showed SA as
@@ -603,9 +729,9 @@ GCI = 1.25 * (0.0088/1.4205) / 3.5193 = 0.00220 = 0.220%</pre>
       Validating against one quantity is not validation.
     </p>
     <p>
-      Reported honestly, SA's failure is concentrated at station 1. At the three downstream stations
-      SA is marginally better than SST. The overall verdict that SST is the better model holds on
-      wall pressure and at station 1, but SA is not uniformly worse.
+      Reported honestly, SA's failure is concentrated at that first station. At the three downstream
+      stations SA is marginally better than SST. The overall verdict that SST is the better model
+      holds on wall pressure and at the first station, but SA is not uniformly worse.
     </p>
 
     <figure>
@@ -614,62 +740,60 @@ GCI = 1.25 * (0.0088/1.4205) / 3.5193 = 0.00220 = 0.220%</pre>
         the shock visibly further downstream. Both shocks run straight from wall to wall.</figcaption>
     </figure>
 
-    <div class="fig-placeholder">[ figure: station-1 Mach profile, SST vs SA vs experiment ]</div>
+    <div class="fig-placeholder">[ figure: velocity profile at the first station, SST vs SA vs experiment ]</div>
 
     <h2>Conclusion</h2>
     <p>
-      Numerical uncertainty was bounded at 0.22%. The disagreement with experiment is 11.2% and it
-      grows with refinement, so it is modelling error rather than discretisation error. Turbulence
-      closure accounts for roughly half of it. SST outperforms SA on wall pressure and dramatically
-      at the first measurement station, though SA is marginally better at the three downstream
+      Numerical uncertainty was measured at 0.22%. The disagreement with experiment is 11.2% and it
+      grows with refinement, so it is modeling error rather than mesh error. Choice of turbulence
+      model accounts for roughly half of it. SST outperforms SA on wall pressure and dramatically at
+      the first measurement station, though SA is marginally better at the three downstream
       stations.
     </p>
     <div class="assessment">
       <p>
-        <b>Steady RANS on a flow with known self-excited oscillations.</b> A deliberate modelling
-        choice. The coarse-mesh limit cycle turned out to be numerical shock jitter, eliminated by
+        <b>Steady RANS on a flow with known self-excited oscillations.</b> A deliberate modeling
+        choice. The coarse-mesh oscillation turned out to be a numerical artifact, eliminated by
         refinement, so the steady assumption was not violated at the resolutions used.
       </p>
       <p>
         <b>2D, no sidewall effects.</b> The archive itself attributes downstream velocity profile
-        disagreement to 3D effects.
+        disagreement to three dimensional effects.
       </p>
       <p>
         <b>Uniform inflow with no incoming boundary layer.</b> Inherited from the case definition
         rather than chosen, and a leading suspect for part of the shock offset.
       </p>
       <p>
-        <b>The separation bubble is not grid-converged.</b> Length oscillates across the family
-        (0.092, 0.112, 0.106 h) so no valid GCI exists, and it is reported as a range. Separation
-        onset is more stable, between 1.558 and 1.565 h, and can be reported with more confidence.
+        <b>The separation bubble is not grid-converged.</b> Its length oscillates across the family
+        (0.092, 0.112, 0.106 h) so no valid uncertainty exists, and it is reported as a range.
+        Separation onset is more stable, between 1.558 and 1.565 h, and can be reported with more
+        confidence.
       </p>
       <p>
-        <b>SA converges about 5x worse than SST</b>, with medium-to-fine shock movement of +0.0442 h
-        against +0.0088 h. Only two SA meshes were run, so no SA GCI exists, and SA's numerical
-        uncertainty is estimated at roughly 1% rather than SST's 0.22%. The model comparison
-        survives comfortably, but this should not be hidden.
+        <b>SA converges about five times worse than SST</b>, with medium-to-fine shock movement of
+        +0.0442 h against +0.0088 h. Only two SA meshes were run, so no SA uncertainty band exists,
+        and it is estimated at roughly 1% rather than SST's 0.22%. The model comparison survives
+        comfortably, but this should not be hidden.
       </p>
       <p>
         <b>Odd-even decoupling appears on the fine mesh.</b> Core velocity alternates between
-        adjacent cells at about 2% amplitude. Counterintuitively it is absent on the medium mesh
-        and appears with refinement, as numerical dissipation falls below what is needed to damp
-        the mode. The gradient limiter (Venkatakrishnan, acceptable field variation 0.05) is active
-        and correctly configured, and the oscillation sits below its activation threshold by
-        design. Wall quantities and the shock-position GCI are unaffected.
+        adjacent cells at about 2% amplitude. It is absent on the medium mesh and appears with
+        refinement, as the numerical damping that suppressed it falls below what is needed. The
+        gradient limiter is active and correctly configured, and the oscillation sits below its
+        activation threshold by design. Wall quantities and the shock position uncertainty are
+        unaffected.
       </p>
       <p>
-        <b>The displacement-thickness mechanism is inferred, not measured</b>, because all
-        experimental profiles are downstream of the shock. Both models are also biased low
-        downstream by 15 to 20 m/s, opposite in sign to the pre-shock deficit the mechanism
-        requires.
+        <b>The blockage mechanism is inferred, not measured</b>, because all experimental profiles
+        are downstream of the shock. Both models are also biased low downstream by 15 to 20 m/s,
+        opposite in sign to the upstream deficit the mechanism requires.
       </p>
       <p>
-        <b>Richardson extrapolation is formally invalid pointwise within a discontinuity.</b> Shock
-        position is a feature location derived from the full wall distribution rather than a
-        pointwise value inside the shock, and the asymptotic ratio of 1.006 confirms the power law
-        holds. Peak Mach (p = 2.39, GCI 0.089%, a smooth-region quantity) is reported alongside as
-        corroboration. The three quantities that failed to converge are exactly the
-        pointwise-at-the-shock values the caveat concerns.
+        <b>The extrapolation method is formally invalid pointwise inside a discontinuity.</b> Shock
+        position is a feature location derived from the full wall distribution rather than a single
+        value inside the shock, and the asymptotic ratio of 1.006 confirms the power law holds. Peak
+        Mach in the field, a smooth-region quantity, is reported alongside as corroboration.
       </p>
     </div>
   </main>
