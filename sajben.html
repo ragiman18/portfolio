@@ -260,25 +260,19 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
     </details>
 
     <p>
-      Achieved y+ came out near 1 rather than the targeted 2. The flat-plate correlation evaluates
-      wall shear at the throat velocity while treating the boundary layer as though it grew at that
-      speed the whole way, when the flow actually accelerates from roughly 150 m/s at the inlet to
-      305 m/s at the throat, which accounts for the factor of two. All three meshes are
-      wall-resolved either way, and since every mesh shifts by the same amount the family stays
-      self-similar.
-    </p>
-    <p>
-      Achieved y+ also does not fall steadily across the family (0.998, 0.866, 0.933) even though
-      the cells shrink every time. y+ depends on computed wall friction as well as spacing, and
-      better boundary layer resolution produces higher computed friction, which largely cancels the
-      finer cells. First cell height is the design input; y+ is the measured outcome.
+      Achieved y+ came out near 1 rather than the targeted 2, because the flat-plate correlation
+      evaluates wall shear at the throat velocity while treating the boundary layer as though it
+      grew at that speed the whole way, when the flow actually accelerates from roughly 150 m/s at
+      the inlet. It also does not fall steadily across the family (0.998, 0.866, 0.933) even though
+      the cells shrink every time, since y+ depends on computed wall friction as well as spacing and
+      better resolution raises that friction. First cell height is the design input; y+ is the
+      measured outcome. All three meshes are wall-resolved either way.
     </p>
     <p>
       The near-wall aspect ratio being identical on all three meshes is the useful number here. It
-      shows the three meshes are genuinely the same mesh at different scales rather than three
-      different meshes, because cell shape is preserved and only cell size changes. That is the
-      condition the grid convergence method requires, and most studies assert it without
-      demonstrating it.
+      shows the three meshes are the same mesh at different scales rather than three different
+      meshes, because cell shape is preserved and only cell size changes. That is the condition the
+      grid convergence method requires, and most studies assert it without demonstrating it.
     </p>
 
     <details>
