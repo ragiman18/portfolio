@@ -50,47 +50,23 @@
 
     <h2>Problem</h2>
     <p>
-      When a CFD result disagrees with experiment, there are two possible causes. Either the
-      equations were solved imprecisely, meaning the mesh was too coarse, or the wrong equations
-      were solved, meaning the physical model is inadequate. Most studies cannot tell these apart,
-      which makes a statement like "my result is 10% off" close to uninterpretable. The
-      disagreement might vanish on a finer mesh, or it might be the physics, and without further
-      work there is no way to know which.
-    </p>
-    <p>
-      Running the same case on three meshes of increasing resolution shows how much the answer is
-      still moving as the mesh improves, and that puts a number on how much of the error the mesh
-      is responsible for. If that number is small, a large remaining disagreement has to be coming
-      from the model instead. This is standard practice in industrial verification and validation,
-      and it is the step most commonly skipped.
-    </p>
-    <p>
       This flow is an analog for off-nominal, overexpanded nozzle operation: a shock sitting inside
       the duct with the boundary layer separating behind it, which is what happens to a rocket
       nozzle at low altitude or during throttling. It is deliberately not the clean isentropic
       expansion of a nozzle running at its design point, and shock position matters in that regime
       because it sets where the flow separates from the wall.
     </p>
-
-    <details>
-      <summary>Verification and validation are different questions</summary>
-      <p>
-        <b>Verification asks: am I solving the equations right?</b> This is pure mathematics and
-        has nothing to do with reality. The RANS equations have an exact solution on an infinitely
-        fine mesh. Any real mesh is finite, so the answer carries an error from that. Verification
-        measures it. You could do verification without ever looking at experimental data.
-      </p>
-      <p>
-        <b>Validation asks: am I solving the right equations?</b> This compares against physical
-        measurement. Whatever disagreement remains after the numerical error has been measured is
-        attributable to the model itself: the turbulence model, the 2D assumption, the steady
-        assumption.
-      </p>
-      <p>
-        The order matters. You cannot honestly claim RANS is wrong by 11% until you have shown that
-        mesh error is much smaller than 11%.
-      </p>
-    </details>
+    <p>
+      Predicting that position is only useful if the error in it can be attributed. When a CFD result
+      disagrees with experiment, there are two possible causes. Either the equations were solved
+      imprecisely, meaning the mesh was too coarse, or the wrong equations were solved, meaning the
+      physical model is inadequate. Most studies cannot tell these apart, which makes a statement
+      like "my result is 10% off" close to uninterpretable. Running the same case on three meshes of
+      increasing resolution shows how much the answer is still moving as the mesh improves, which
+      puts a number on how much of the error the mesh is responsible for. If that number is small, a
+      large remaining disagreement has to be coming from the model. This is standard practice in
+      industrial verification and validation, and it is the step most commonly skipped.
+    </p>
 
     <h2>The case</h2>
     <p>
@@ -100,16 +76,16 @@
       run can be checked against two separate sets of experimental data rather than one.
     </p>
     <p>
-      Air enters subsonically at M = 0.46, accelerates through the contraction to about M = 1.25
-      just past the throat, terminates in a normal shock, separates from the upper wall, and
-      recovers subsonically through the diffuser.
+      Air enters subsonically at M = 0.46, accelerates through the contraction, goes supersonic past
+      the throat, terminates in a normal shock, separates from the upper wall, and recovers
+      subsonically through the diffuser.
     </p>
     <p>
       What makes it a hard case is that the shock and the boundary layer feed back on each other.
-      The shock's pressure rise thickens and separates the boundary layer, the separated layer
-      changes how much of the duct the flow can actually use, and that in turn moves the shock.
-      RANS turbulence models handle this interaction imperfectly, and the documented failure mode
-      for this case is a shock predicted slightly downstream of where it was measured.
+      The shock's pressure rise separates the boundary layer, the separated layer changes how much
+      of the duct the flow can actually use, and that in turn moves the shock. RANS handles this
+      interaction imperfectly, and the documented failure mode for this case is a shock predicted
+      downstream of where it was measured.
     </p>
 
     <table>
