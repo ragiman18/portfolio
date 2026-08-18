@@ -303,7 +303,7 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
     <p>
       The case was run with a coupled density-based implicit solver, second-order accurate
       throughout, using Roe flux-difference splitting, Sutherland's law for viscosity, and low-Mach
-      preconditioning.
+      preconditioning, with the k-omega SST turbulence model.
     </p>
 
     <details>
@@ -626,7 +626,7 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
     </p>
 
     <figure>
-      <img src="images/sajben_wall_pressure.png" alt="Wall static pressure against x over h, CFD against experiment, with residual panel">
+      <img src="images/wall_pressure_fine.png" alt="Wall static pressure against x over h, CFD against experiment, with residual panel">
       <figcaption><b>Fig. X.</b> Wall static pressure, fine mesh, against the archive tap
         measurements. Bottom panel: CFD minus experiment at each tap, plotted on its own scale so
         the disagreement is readable. Nearly all of it sits in the shock region and downstream of
