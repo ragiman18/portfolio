@@ -275,26 +275,23 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
       grid convergence method requires, and most studies assert it without demonstrating it.
     </p>
 
-    <details>
+  <details>
       <summary>Why structured, and why refine by 1.5 rather than the more common root-2</summary>
       <p>
-        <b>Structured</b> because the grid convergence method requires the meshes to be
-        geometrically similar with a clear, uniform refinement factor. Scaling the node count in
-        each direction shrinks every cell by the same amount, so cell size is unambiguous. On an
-        unstructured mesh "refine by 1.5x" is fuzzy, because the mesher redistributes cells
-        unevenly and the effective factor varies from place to place. There is also a shock-capture
-        reason: cell faces aligned with the flow keep the shock crisp, whereas a shock cutting
-        diagonally across skewed cells gets smeared over a wider band, which blurs the shock
-        position, the main quantity being measured.
+        <b>Structured</b> because the grid convergence method requires geometrically similar meshes
+        with one clear refinement factor. Scaling node count in each direction shrinks every cell by
+        the same amount. On an unstructured mesh "refine by 1.5x" is fuzzy, since the mesher
+        redistributes cells unevenly and the effective factor varies from place to place. Aligned
+        cell faces also keep the shock crisp, whereas a shock cutting diagonally across skewed cells
+        gets smeared, which blurs the quantity being measured.
       </p>
       <p>
-        <b>A factor of 1.5</b> because the formula for observed order assumes the refinement factor
-        is identical between every pair of meshes, and root-2 cannot be hit exactly with whole
-        numbers of cells. Going 160, 226, 320 gives actual factors of 1.4125 and 1.4159, which
-        drift apart. Going 160, 240, 360 gives exactly 1.5 every time. The larger gap between
-        meshes also produces a cleaner signal against iterative noise.
+        <b>A factor of 1.5</b> because the observed-order formula assumes an identical refinement
+        factor between every pair of meshes, and root-2 cannot be hit exactly with whole numbers of
+        cells. Going 160, 226, 320 gives 1.4125 and 1.4159, which drift. Going 160, 240, 360 gives
+        exactly 1.5 every time, and the wider spacing between meshes gives a cleaner signal against
+        iterative noise.
       </p>
-    </details>
 
     <h3>Solver</h3>
     <p>
