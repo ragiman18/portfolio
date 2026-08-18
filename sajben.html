@@ -637,8 +637,8 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
     <h3>The headline comparison</h3>
     <p>
       The disagreement with experiment is 11.17%, against a numerical uncertainty of 0.220%. It also
-      grew with refinement, going 7.18%, 10.29%, 11.17%. That is modeling error, and the
-      verification study is what makes it a defensible claim rather than an assertion.
+      grew with refinement, going 7.18%, 10.29%, 11.17%. That is modeling error, and the verification 
+      study is what makes it a claim rather than an assertion.
     </p>
 
     <h3>Velocity profiles</h3>
@@ -673,52 +673,48 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
     
     <h3>Why the shock sits downstream</h3>
     <p>
-      Where the shock sits in a duct depends on the balance between back pressure and the flow area
-      actually available. That available area is not the geometric area, because the slow-moving
-      boundary layer along each wall effectively blocks part of the duct. If a model under-predicts
-      how much the boundary layer blocks, the flow sees more room than it really has, keeps
-      accelerating for longer, and shocks further downstream.
+      Shock position in a duct is set by the balance between back pressure and available flow area.
+      Available area is not geometric area, because the slow-moving boundary layer on each wall
+      blocks part of the duct. A model that under-predicts that blockage gives the flow more room
+      than it has, so the flow keeps accelerating and shocks further downstream.
     </p>
     <p>
-      Four separate modeling assumptions all push in that same direction.
+      Four modeling assumptions push that way.
     </p>
     <p>
-      The first is the turbulence model itself. RANS models assume the turbulence at any point is in
-      balance with the flow conditions there. Passing through a shock, conditions change almost
-      instantly while the turbulence takes time to respond, so that assumption breaks down. The
-      model behaves as though the turbulence has already adjusted, which makes it over-predict
-      mixing through the shock. Extra mixing drags fast-moving air down toward the wall, keeping the
-      boundary layer thinner and more resistant to separating than it really is, so it blocks less
-      of the duct.
+      <b>The turbulence model.</b> RANS assumes turbulence at any point is in balance with local
+      flow conditions. Across a shock, conditions change almost instantly while turbulence takes
+      time to respond, so the model behaves as though the turbulence has already adjusted and
+      over-predicts mixing. Extra mixing drags fast air toward the wall, keeping the boundary layer
+      thinner and more resistant to separating than it is, so it blocks less.
     </p>
     <p>
-      The second is that the simulation is 2D. In the physical wind tunnel the side walls sit about
-      four throat-heights apart and each carries its own boundary layer, adding blockage a 2D model
-      has no way to include.
+      <b>2D.</b> The tunnel side walls sit about four throat-heights apart and each carries its own
+      boundary layer. A 2D model has no way to include that blockage.
     </p>
     <p>
-      Third, the case definition specifies uniform inflow with no boundary layer already present at
-      the inlet. In the simulation the boundary layers start from nothing and grow over the run to
-      the throat, so they arrive thinner than in the experiment.
+      <b>Uniform inflow.</b> The case definition specifies no boundary layer at the inlet, so the
+      boundary layers start from nothing and grow over the run to the throat. They arrive thinner
+      than in the experiment.
     </p>
     <p>
-      Fourth, this is a steady simulation of a flow the original experiment found to oscillate on
-      its own. The measured shock position is a time average of a shock sweeping back and forth,
-      which is not the same quantity as a steady solution.
+      <b>Steady.</b> The original experiment found this flow oscillates on its own. The measured
+      shock position is a time average of a shock sweeping back and forth, which is not the same
+      quantity as a steady solution.
     </p>
     <p>
-      The sensitivity involved is worth putting a number on. Moving the shock from where the
-      simulation puts it to where the experiment measured it requires the effective flow area to
-      shrink by only 0.330 mm, about 0.165 mm per wall. Such a tiny change moves the shock so far
-      because the duct barely changes shape in this region: near the throat the cross section opens
-      up very gradually with distance, so recovering a small area deficit takes a long streamwise
-      run. A sub-0.2 mm error per wall in boundary layer thickness therefore becomes a 10% error in
-      shock position.
+      The first is the only one that can be tested by changing a single setting, which is the next
+      section.
     </p>
     <p>
-      This mechanism remains an inference. All four experimental velocity profile stations sit
-      downstream of the shock, so boundary layer thickness upstream of it cannot be measured from
-      the available data.
+      The sensitivity is severe. Closing the 11.2% gap requires the effective flow area to shrink by
+      0.330 mm, about 0.165 mm per wall, because the duct opens up very gradually here and
+      recovering a small area deficit takes a long streamwise run. A sub-0.2 mm error in boundary
+      layer thickness becomes a 10% error in shock position.
+    </p>
+    <p>
+      The mechanism is an inference. All four experimental profile stations sit downstream of the
+      shock, so boundary layer thickness upstream of it cannot be measured from the available data.
     </p>
 
     <h2>Turbulence model comparison</h2>
