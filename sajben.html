@@ -555,20 +555,17 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
     <details>
       <summary>How the error is computed</summary>
       <p>
-        The CFD produces pressure at several hundred points along each wall; the experiment has
-        roughly 35 pressure taps. The two sets do not line up, so the CFD curve is interpolated onto
-        the experimental tap locations. That direction matters. CFD data is dense and smooth, so
-        interpolating it introduces almost nothing, whereas interpolating the sparse experimental
-        data would invent measurements that were never taken.
+        The CFD gives pressure at several hundred points along each wall against roughly 35
+        experimental taps, so the CFD curve is interpolated onto the tap locations. That direction
+        matters: CFD data is dense and smooth, so interpolating it introduces almost nothing, while
+        interpolating the sparse experimental data would invent measurements that were never taken.
       </p>
-      <p>The error at each tap, and the RMS across all of them:</p>
       <pre>e_i  = (p/P0)_CFD,i - (p/P0)_exp,i
 
 RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
       <p>
-        Squaring before averaging stops overshoots and undershoots from canceling each other out,
-        and weights large errors more heavily than small ones. The percentage version divides each
-        error by that point's own experimental value before squaring.
+        The percentage version divides each error by that point's own experimental value before
+        squaring.
       </p>
     </details>
 
@@ -584,71 +581,96 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
 
     <p>
       Splitting the error by region turns a single number into a diagnosis. The model is close to
-      exact where the flow is well behaved, recovering the downstream diffuser pressure to 0.26%,
-      and nearly all of the disagreement sits in the shock region. The error there is positional
-      rather than in magnitude: the pressure jump has the right size, it just happens about 0.14
-      throat-heights too far downstream.
+      exact where the flow is well behaved, recovering downstream diffuser pressure to 0.26%, and
+      nearly all of the disagreement sits in the shock region. The error there is positional, not in
+      magnitude. The pressure jump is the right size, it just happens about 0.14 throat-heights too
+      far downstream.
     </p>
     <p>
-      The overall RMS gets slightly worse as the mesh refines, going 4.36, 4.84, 4.86% on the upper
-      wall. Out of context that looks like a defect, and it is actually the study's central
-      evidence. A coarse mesh smears the shock over a wider band, which happens to overlap the
-      experimental data slightly better. Sharpening the shock removes that accidental overlap and
-      exposes the real model error. This trend should never be shown without the regional breakdown,
-      which has upstream and downstream errors flat or improving throughout.
+      One error sits outside the shock region. The upper-wall CFD overshoots the measured pressure
+      peak in the contraction at x/h = -2.36, by 0.07 in p/P0, the largest disagreement anywhere
+      except the shock itself. That location is where the spline reconstruction is least
+      constrained by the archive points, and where the experimental taps are sparsest.
+    </p>
+    <details>
+      <summary>The upstream pressure peak, and why it is most likely geometry</summary>
+      <p>
+        The worst spline-versus-chord deviation in the geometry is 351 um at x/h = -2.453, and peak
+        upper-wall curvature is at x/h = -2.308. The CFD pressure peak sits at -2.356, between them.
+        This is the concave corner where the flat inlet turns into the contraction, the pressure
+        peak there responds directly to wall curvature, and it is the one place the cubic spline is
+        least constrained by NASA's 81 points. A slightly sharper reconstructed corner gives a
+        stronger, earlier compression. The largest upstream error appears where the geometry is
+        least certain.
+      </p>
+      <p>
+        Experimental resolution also matters. Tap spacing there averages 0.43 h against 0.035 h for
+        the CFD points, a factor of 12. With taps at -2.755, -2.029 and -1.706, the measured peak of
+        0.8802 is a single sample. If the true peak falls between taps it is understated, and its
+        apparent location is uncertain by roughly 0.3 h. Part of the 0.028 amplitude gap may not be
+        real.
+      </p>
+      <p>
+        Uniform inflow contributes as well. With no incoming boundary layer there is less blockage
+        entering the contraction, so a slightly different effective area and a marginally different
+        compression. Smaller than the other two, and already on the limitations list.
+      </p>
+    </details>
+    <p>
+      Overall RMS gets slightly worse as the mesh refines, going 4.36, 4.84, 4.86% on the upper
+      wall. That looks like a defect and is the study's central evidence. A coarse mesh smears the
+      shock over a wider band, which happens to overlap the experimental data better. Sharpening the
+      shock removes the accidental overlap and exposes the real model error. Upstream and downstream
+      errors are flat or improving throughout, which is why the regional breakdown has to accompany
+      the overall number.
     </p>
 
-    <div class="fig-placeholder">[ figure: wall pressure vs experiment, with residual panel ]</div>
+    <figure>
+      <img src="images/sajben_wall_pressure.png" alt="Wall static pressure against x over h, CFD against experiment, with residual panel">
+      <figcaption><b>Fig. X.</b> Wall static pressure, fine mesh, against the archive tap
+        measurements. Bottom panel: CFD minus experiment at each tap, plotted on its own scale so
+        the disagreement is readable. Nearly all of it sits in the shock region and downstream of
+        x/h = 2 both walls fall onto zero. The negative spike is the shock arriving too late, not a
+        pressure jump of the wrong size.</figcaption>
+    </figure>
 
     <h3>The headline comparison</h3>
-    <table>
-      <thead><tr><th></th><th>Value</th></tr></thead>
-      <tbody>
-        <tr><td>Numerical uncertainty (GCI, shock position)</td><td>0.220%</td></tr>
-        <tr><td>Disagreement with experiment</td><td>11.17%</td></tr>
-        <tr class="highlight"><td>Ratio</td><td>50.8&times;</td></tr>
-      </tbody>
-    </table>
     <p>
-      The disagreement is nearly 51 times larger than anything mesh refinement could remove, and it
-      grew with refinement, going 7.18%, 10.29%, 11.17%. That is modeling error. The verification
-      study is what makes the claim defensible rather than an assertion, because nobody can respond
-      "refine further" when the study has already bounded what refining further could buy.
+      The disagreement with experiment is 11.17%, against a numerical uncertainty of 0.220%. It also
+      grew with refinement, going 7.18%, 10.29%, 11.17%. That is modeling error, and the
+      verification study is what makes it a defensible claim rather than an assertion.
     </p>
 
     <h3>Velocity profiles</h3>
     <p>
-      The archive also provides measured velocity profiles at four stations downstream of the shock,
-      at x/h = 1.729, 2.882, 4.611 and 6.340, giving a second and completely independent quantity to
-      validate against.
+      The archive also gives measured velocity profiles at four stations downstream of the shock,
+      x/h = 1.729, 2.882, 4.611 and 6.340. That is a second validation quantity, independent of wall
+      pressure.
     </p>
 
     <table>
-      <thead><tr><th>Station x/h</th><th>SST RMS</th><th>SA RMS</th><th>SST bias</th><th>SA bias</th></tr></thead>
+      <thead><tr><th>Station x/h</th><th>RMS</th><th>Bias</th></tr></thead>
       <tbody>
-        <tr><td>1.729</td><td>17.2%</td><td>32.6%</td><td>-9.6 m/s</td><td>+55.2 m/s</td></tr>
-        <tr><td>2.882</td><td>21.9%</td><td>21.3%</td><td>-20.2</td><td>-18.6</td></tr>
-        <tr><td>4.611</td><td>24.1%</td><td>20.8%</td><td>-20.5</td><td>-18.3</td></tr>
-        <tr><td>6.340</td><td>18.8%</td><td>15.3%</td><td>-17.3</td><td>-15.0</td></tr>
+        <tr><td>1.729</td><td>17.2%</td><td>&minus;9.6 m/s</td></tr>
+        <tr><td>2.882</td><td>21.9%</td><td>&minus;20.2</td></tr>
+        <tr><td>4.611</td><td>24.1%</td><td>&minus;20.5</td></tr>
+        <tr><td>6.340</td><td>18.8%</td><td>&minus;17.3</td></tr>
       </tbody>
     </table>
 
     <p>
-      Velocity profiles are a harsher test than wall pressure, with errors of 17 to 24% against 4 to
-      5%. The archive attributes much of the downstream profile disagreement to three dimensional
-      effects, which a 2D model cannot reproduce.
+      Velocity profiles are a harsher test than wall pressure, 17 to 24% against 4 to 5%. The
+      archive attributes much of the downstream disagreement to three dimensional effects, which a
+      2D model cannot reproduce.
     </p>
     <p>
-      A systematic pattern also shows up in the bias column. Both models run slow by 15 to 20 m/s at
-      every downstream station, meaning both over-predict how much of the duct the boundary layer
-      blocks in the recovery region. That points the opposite way from the shock position result,
-      where the models under-predict blockage upstream of the shock. Different regions with
-      different mechanisms, so the two are not in conflict, but the inconsistency is real and worth
-      stating rather than smoothing over.
+      The bias is systematic. SST runs slow by 15 to 20 m/s at every downstream station, so it
+      over-predicts how much of the duct the boundary layer blocks in the recovery region. That is
+      the opposite of the shock position result, where the model under-predicts blockage upstream of
+      the shock. Different regions with different mechanisms, so the two are not in conflict, but
+      the inconsistency is real.
     </p>
-
-    <div class="fig-placeholder">[ figure: four-panel velocity profiles, SST and SA against experiment ]</div>
-
+    
     <h3>Why the shock sits downstream</h3>
     <p>
       Where the shock sits in a duct depends on the balance between back pressure and the flow area
