@@ -50,7 +50,7 @@
 
     <h2>Problem</h2>
     <p>
-      This flow is an analog for off-nominal, overexpanded nozzle operation: a shock sitting inside
+      This flow is an analog for off-nominal, overexpanded nozzle operation. There is a shock sitting inside
       the duct with the boundary layer separating behind it, which is what happens to a rocket
       nozzle at low altitude or during throttling. It is deliberately not the clean isentropic
       expansion of a nozzle running at its design point, and shock position matters in that regime
@@ -180,13 +180,11 @@
       solution settled at an inlet Mach of <b>0.45971</b> on the fine mesh, a 0.063% error against
       the published 0.46. A geometry error, a unit error, or a wrong reference pressure would all
       show up here. The value drifts slightly further from 0.46 as the mesh refines, in the same
-      direction as everything else in this study, and the by-mesh numbers are in the verification
-      section.
+      direction as everything else in this study. The numbers for each mesh are in the verification section.
     </p>
     <p>
       The archive does not specify inlet turbulence quantities, so solver defaults were kept
-      (turbulence intensity 1%, turbulent viscosity ratio 10). Keeping the default is easier to
-      defend than a hand-picked value when nothing is sourced.
+      (turbulence intensity 1%, turbulent viscosity ratio 10). 
     </p>
 
     <h3>Mesh</h3>
@@ -345,78 +343,68 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
 
     <h3>Iterative convergence</h3>
     <p>
-      Mass is conserved to 2.8 &times; 10<sup>-5</sup> % on the fine mesh, with residuals flat.
-      Computed mass flow reaches 99.08% of the ideal value for a choked throat. That 0.9% shortfall
-      is physically correct rather than an error, because the boundary layer occupies part of the
-      throat and leaves the flow slightly less area than the geometry suggests. Hitting exactly 100%
-      would mean the boundary layer was missing.
+      Mass is conserved to 2.8 &times; 10<sup>-5</sup> % on the fine mesh with residuals flat, and
+      mass flow reaches 99.08% of the ideal choked value. The 0.9% shortfall is the boundary layer
+      taking up part of the throat. Exactly 100% would mean it was missing.
     </p>
     <p>
-      One methodological correction is worth reporting. The original plan fixed every mesh at 5000
-      iterations so the three runs would be comparable. That was not enough for the fine mesh, which
-      was still showing residual spikes and needed 6500. Running the same number of iterations does
-      not mean the runs reached the same level of convergence, and the grid convergence method
-      assumes leftover iterative error is negligible compared with mesh error. The defensible
-      approach is to converge each mesh to a target level and report the iteration count as a result
-      rather than fixing it as a setting.
+      Every mesh was originally fixed at 5000 iterations so the runs would be comparable. The fine
+      mesh was still spiking at 5000 and needed 6500. Equal iteration counts do not mean equal
+      convergence, and grid convergence assumes iterative error is negligible next to mesh error, so
+      each mesh was instead converged to a target residual level and the iteration count reported as
+      a result.
     </p>
     <p>
-      The coarse mesh also never fully settled. Its residuals dropped and then oscillated at a
-      steady amplitude instead of continuing down. Refining the mesh removed the oscillation
-      completely, which identified the cause: on the coarse mesh the shock was jumping back and
-      forth between neighboring cells because the cells were too large to place it precisely. This
-      diffuser is known to have genuine physical shock oscillation, so the distinction mattered.
-      A physical oscillation would not disappear just because the mesh improved.
+      The coarse mesh never fully settled. Its residuals dropped, then oscillated at steady
+      amplitude instead of continuing down. Refining removed the oscillation completely, so the
+      cause was the shock jumping between cells too large to place it precisely. That distinction
+      mattered: this diffuser has genuine physical shock oscillation, and a physical oscillation
+      would not disappear on a better mesh.
     </p>
 
     <figure>
-      <img src="images/sajben_mach_three_meshes.png" alt="Mach contours on coarse, medium and fine meshes">
-      <figcaption><b>Fig. 2.</b> Mach contours across the mesh family. The shock sharpens as the
-        mesh refines, and its position shifts downstream toward a converged value.</figcaption>
+      <img src="images/coarse_full_mach_nobar.png" alt="Mach contours, coarse mesh">
+      <img src="images/medium_full_mach_nobar.png" alt="Mach contours, medium mesh" style="margin-top:10px">
+      <img src="images/fine_full_mach_label.png" alt="Mach contours, fine mesh, with color scale" style="margin-top:10px">
+      <figcaption><b>Fig. 2.</b> Mach contours across the mesh family, coarse to fine. The shock
+        sharpens with refinement, from a smeared band on the coarse mesh to a crisp front on the
+        fine. Its position also shifts downstream, by too little (0.049 x/h) to see at this scale.
+        Color scale shared across all three; contour banding in the subsonic recovery region is an
+        artifact of the discrete scale.</figcaption>
     </figure>
 
     <h3>Grid convergence</h3>
     <p>
-      Shock position leads this section. It is the quantity the experiment measures, it is the
-      documented weak point of RANS for this case, and it is the engineering-relevant result, since
-      in a nozzle the shock location determines where the flow separates.
+      Shock position leads this section. It is what the experiment measures, it is the documented
+      weak point of RANS for this case, and in a nozzle it sets where the flow separates.
     </p>
     <p>
       Across the three meshes the shock sat at 1.3719, then 1.4117, then 1.4205 x/h on the upper
-      wall. The steps between meshes shrank from +0.0398 to +0.0088 h, a factor of about four and a
-      half. Shrinking steps are what convergence looks like: the answer is still moving, but by less
-      each time, which makes it possible to estimate where it is heading.
+      wall. The steps shrank from +0.0398 to +0.0088 h, a factor of about four and a half. The
+      answer is still moving but by less each time, which is what makes extrapolation possible.
+      Assuming error falls as a power of cell size,
+      <span style="font-family:var(--mono)">f(h) = f<sub>exact</sub> + C h<sup>p</sup></span>,
+      three meshes give three equations for the three unknowns.
     </p>
     <p>
-      That estimate comes from assuming the error falls as a power of cell size:
+      Shock position on the upper wall gives an observed order of <i>p</i> = 3.72, an extrapolated
+      value of <b>1.4230 x/h</b>, and a Grid Convergence Index of <b>0.220%</b>. GCI is an
+      uncertainty band, not an error: the mesh-independent answer lies within 0.220% of the
+      fine-mesh result, with a 1.25 safety factor built in.
     </p>
-    <p style="font-family:var(--mono);font-size:15px;text-align:center;color:var(--text)">
-      <i>f</i>(<i>h</i>) = <i>f</i><sub>exact</sub> + <i>C</i> <i>h</i><sup><i>p</i></sup>
-    </p>
-    <p>
-      where <i>f</i>(<i>h</i>) is the answer computed on a mesh of cell size <i>h</i>,
-      <i>f</i><sub>exact</sub> is what an infinitely fine mesh would give, <i>C</i> is a constant,
-      and <i>p</i> is the observed order, meaning how fast the error shrinks as cells get smaller.
-      Three unknowns, which is why the study uses three meshes. Writing <i>f</i><sub>1</sub> for
-      fine, <i>f</i><sub>2</sub> for medium, <i>f</i><sub>3</sub> for coarse, and <i>r</i> = 1.5 for
-      the refinement factor:
-    </p>
-    <p style="font-family:var(--mono);font-size:14px;text-align:center;color:var(--text);line-height:2.2">
-      <i>p</i> = ln( |(<i>f</i><sub>3</sub> &minus; <i>f</i><sub>2</sub>) / (<i>f</i><sub>2</sub> &minus; <i>f</i><sub>1</sub>)| ) / ln <i>r</i><br>
-      <i>f</i><sub>exact</sub> = <i>f</i><sub>1</sub> + (<i>f</i><sub>1</sub> &minus; <i>f</i><sub>2</sub>) / (<i>r</i><sup><i>p</i></sup> &minus; 1)<br>
-      GCI = <i>F</i><sub>s</sub> |(<i>f</i><sub>2</sub> &minus; <i>f</i><sub>1</sub>) / <i>f</i><sub>1</sub>| / (<i>r</i><sup><i>p</i></sup> &minus; 1)
-    </p>
-    <p>
-      The Grid Convergence Index (GCI) is the number that matters. It is an uncertainty band rather
-      than an error: it says the true mesh-independent answer lies within that percentage of the
-      fine-mesh result. <i>F</i><sub>s</sub> is a safety factor, 1.25 for a three-mesh study, which
-      makes the band deliberately conservative. Applied to shock position on the upper wall, the
-      observed order comes out at <i>p</i> = 3.72, the extrapolated value at <b>1.4230 x/h</b>, and
-      the GCI at <b>0.220%</b>.
-    </p>
-
+    
     <details>
-      <summary>Worked example, and the asymptotic range check</summary>
+      <summary>The extrapolation formulas, worked example, and asymptotic range check</summary>
+      <p>
+        <i>f</i><sub>1</sub> is fine, <i>f</i><sub>2</sub> medium, <i>f</i><sub>3</sub> coarse, and
+        <i>r</i> = 1.5 the refinement factor. <i>p</i> is the observed order: how fast error shrinks
+        as cells get smaller. <i>F</i><sub>s</sub> = 1.25 is the standard safety factor for a
+        three-mesh study.
+      </p>
+      <pre>p       = ln( |(f3 - f2)/(f2 - f1)| ) / ln(r)
+f_exact = f1 + (f1 - f2)/(r^p - 1)
+GCI     = Fs * |(f2 - f1)/f1| / (r^p - 1)</pre>
+      <p>Applied to shock position:</p>
       <pre>f3 = 1.3719 (coarse), f2 = 1.4117 (medium), f1 = 1.4205 (fine)
 
 (f3 - f2) = -0.0398
@@ -429,20 +417,18 @@ r^p       = 1.5^3.7221 = 4.5193
 f_exact   = 1.4205 + 0.0088/3.5193 = 1.4230
 GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
       <p>
-        There is one more check. The power law above only holds if all three meshes are already
-        fine enough for a single leading error term to dominate, a state called the asymptotic
-        range. The test for it compares the two mesh pairs:
+        The power law only holds if all three meshes are fine enough for a single leading error term
+        to dominate, the asymptotic range. The test compares the two mesh pairs:
       </p>
       <pre>R = GCI_32 / (r^p * GCI_21),   should be close to 1</pre>
       <p>
-        Shock position gives R = 1.006. NASA's own worked example describes 1.002 as well within
-        the asymptotic range, so 1.006 says the extrapolation is trustworthy rather than a hopeful
-        curve fit. Full method description:
+        Shock position gives R = 1.006. NASA's worked example treats 1.002 as well inside the
+        asymptotic range, so the extrapolation holds. Method:
         <a href="https://www.grc.nasa.gov/www/wind/valid/tutorial/spatconv.html">NASA spatial
         convergence tutorial</a>.
       </p>
     </details>
-
+    
     <p>
       Running the same procedure on every quantity of interest gave three distinct behaviors, and
       each has a physical explanation.
