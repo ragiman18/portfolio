@@ -233,7 +233,7 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
     
     <figure>
       <img src="images/fine_mesh_full.png" alt="Structured mesh through the full diffuser domain">
-      <figcaption><b>Fig. X.</b> Fine mesh, full domain. Quad cells aligned with the flow direction,
+      <figcaption><b>Fig. 2.</b> Fine mesh, full domain. Quad cells aligned with the flow direction,
         clustered toward both walls. The dark bands along the walls are the near-wall layers,
         too fine to resolve individually at this scale.</figcaption>
     </figure>
@@ -369,7 +369,7 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
       <img src="images/coarse_full_mach_nobar.png" alt="Mach contours, coarse mesh">
       <img src="images/medium_full_mach_nobar.png" alt="Mach contours, medium mesh" style="margin-top:10px">
       <img src="images/fine_full_mach_label.png" alt="Mach contours, fine mesh, with color scale" style="margin-top:10px">
-      <figcaption><b>Fig. 2.</b> Mach contours across the mesh family, coarse to fine. The shock
+      <figcaption><b>Fig. 3.</b> Mach contours across the mesh family, coarse to fine. The shock
         sharpens with refinement, from a smeared band on the coarse mesh to a crisp front on the
         fine. Its position also shifts downstream, by too little (0.049 x/h) to see at this scale.
         Color scale shared across all three; contour banding in the subsonic recovery region is an
@@ -533,7 +533,7 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
 
     <figure>
       <img src="images/gci_shock_position.png" alt="Shock position against representative cell size, with Richardson extrapolation and GCI band">
-      <figcaption><b>Fig. 3.</b> Shock position against cell size. The three meshes converge along
+      <figcaption><b>Fig. 4.</b> Shock position against cell size. The three meshes converge along
         the fitted power law (p = 3.72) to 1.4230 x/h at zero cell size. The shaded band is the
         0.220% GCI. The experimental value sits 11.2% below the converged result, 51 times the
         numerical uncertainty.</figcaption>
@@ -623,7 +623,7 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
 
     <figure>
       <img src="images/wall_pressure_fine.png" alt="Wall static pressure against x over h, CFD against experiment, with residual panel">
-      <figcaption><b>Fig. X.</b> Wall static pressure, fine mesh, against the archive tap
+      <figcaption><b>Fig. 5.</b> Wall static pressure, fine mesh, against the archive tap
         measurements. Bottom panel: CFD minus experiment at each tap, plotted on its own scale so
         the disagreement is readable. Nearly all of it sits in the shock region and downstream of
         x/h = 2 both walls fall onto zero. The negative spike is the shock arriving too late, not a
@@ -757,7 +757,7 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
     <figure>
       <img src="images/sst_shock_zoom.png" alt="Mach contours in the shock region, SST">
       <img src="images/sa_shock_zoom.png" alt="Mach contours in the shock region, SA, with color scale" style="margin-top:10px">
-      <figcaption><b>Fig. X.</b> Shock region at matched scale and camera, SST (top) and SA
+      <figcaption><b>Fig. 6.</b> Shock region at matched scale and camera, SST (top) and SA
         (bottom). SA places the shock visibly further downstream. Both shocks run straight from wall
         to wall. The fine vertical banding just downstream of each shock is the odd-even decoupling
         noted in the assessment. Stair-stepping upstream of the shock is contour rendering across
@@ -783,7 +783,7 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
     </p>
     <figure>
       <img src="images/velocity_profiles_fine.png" alt="Velocity profiles at four stations, SST and SA against experiment">
-      <figcaption><b>Fig. X.</b> Velocity profiles at the four measurement stations, plotted from
+      <figcaption><b>Fig. 7.</b> Velocity profiles at the four measurement stations, plotted from
         the lower wall. At x/h = 1.729 SA carries a supersonic core at roughly 370 m/s where the
         experiment and SST are both subsonic, with the shear layer above the separated region
         sitting lower and sharper than SST's. At the three downstream stations the two models
