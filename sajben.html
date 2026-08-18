@@ -192,24 +192,8 @@
     <h3>Mesh</h3>
     <p>
       Structured mesh built with STAR-CCM+ Directed Mesh, three levels, with every cell dimension
-      shrinking by exactly 1.5 between levels.
-    </p>
-    <p>
-      Structured mesh built with STAR-CCM+ Directed Mesh, three levels, with every cell dimension
       shrinking by exactly 1.5 between levels. Wall spacing targets y+ = 2 on the coarse mesh.
     </p>
-
-    <table>
-      <thead>
-        <tr><th>Mesh</th><th>Cells</th><th>Streamwise &Delta;x</th><th>First cell height</th><th>Achieved y+</th><th>Near-wall aspect ratio</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Coarse</td><td>12,800</td><td>3.490 mm</td><td>2.456 um</td><td>0.998</td><td>1421</td></tr>
-        <tr><td>Medium</td><td>28,800</td><td>2.326 mm</td><td>1.637 um</td><td>0.866</td><td>1421</td></tr>
-        <tr><td>Fine</td><td>64,800</td><td>1.551 mm</td><td>1.092 um</td><td>0.933</td><td>1421</td></tr>
-      </tbody>
-    </table>
-
     <details>
       <summary>How the first cell height was sized</summary>
       <p>
@@ -256,6 +240,18 @@
         outcome.
       </p>
     </details>
+    <table>
+      <thead>
+        <tr><th>Mesh</th><th>Cells</th><th>Streamwise &Delta;x</th><th>First cell height</th><th>Achieved y+</th><th>Near-wall aspect ratio</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Coarse</td><td>12,800</td><td>3.490 mm</td><td>2.456 um</td><td>0.998</td><td>1421</td></tr>
+        <tr><td>Medium</td><td>28,800</td><td>2.326 mm</td><td>1.637 um</td><td>0.866</td><td>1421</td></tr>
+        <tr><td>Fine</td><td>64,800</td><td>1.551 mm</td><td>1.092 um</td><td>0.933</td><td>1421</td></tr>
+      </tbody>
+    </table>
+
+
     <details>
       <summary>Why structured, and why refine by 1.5 rather than the more common root-2</summary>
       <p>
