@@ -118,22 +118,45 @@
     <h3>Geometry</h3>
     <p>
       The archive provides each wall as 81 coordinate points. Joining those points with straight
-      lines leaves the wall slightly kinked rather than smooth, and in the tightest part of the
-      contraction that straight-line wall sits up to 350 um away from where a smooth curve would
-      run. That is around 300 times the height of the smallest cell in the mesh, so every kink
-      would act as a small artificial disturbance in exactly the boundary layer the mesh was built
-      to resolve. Both walls were therefore resampled onto a cubic spline before meshing.
+      lines leaves the wall kinked rather than smooth, and in the tightest part of the contraction
+      that faceted wall sits up to 350 &mum from where a smooth curve would run, around 300 times the
+      height of the smallest cell in the mesh. Every kink would act as a small artificial
+      disturbance in exactly the boundary layer the mesh was built to resolve, so both walls were
+      resampled onto a cubic spline before meshing. The resampled geometry matches the archive's
+      quoted throat height and exit-to-throat area ratio to within 0.001%. An assumption worth stating
+      is the spline reconstructs the wall between NASA's points, and the original tunnel
+      contour is not available.
     </p>
-    <p>
-      The resampled geometry was checked against the archive specification and matched the quoted
-      throat height and exit-to-throat area ratio to within 0.001%.
-    </p>
-    <p>
-      One assumption is worth stating. The spline is a reconstruction of the wall between NASA's
-      points, and the original tunnel contour is not available. A spline is the standard choice for
-      a smooth physical wall and is far closer to reality than straight segments, but it is not the
-      original geometry.
-    </p>
+    <details>
+      <summary>Geometry build, and how the reconstruction was checked</summary>
+      <p>
+        The 81 archive points are spaced 0.14 to 0.53 in apart. Both walls were resampled onto a
+        cubic spline at 801 points and converted to metres. Checks after resampling:
+      </p>
+      <table>
+        <thead><tr><th>Quantity</th><th>Resampled</th><th>Archive</th></tr></thead>
+        <tbody>
+          <tr><td>Throat height</td><td>1.732199 in</td><td>1.73221 in</td></tr>
+          <tr><td>Inlet height</td><td>2.44483 in</td><td>2.44483 in</td></tr>
+          <tr><td>Exit height</td><td>2.59830 in</td><td>2.59830 in</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Splining also moved the computed throat from x = -0.0394 in to x = +0.0086 in, essentially
+        onto x = 0, which is closer to the archive's stated throat location than the raw points
+        were. That is a useful sign the reconstruction is not distorting the geometry.
+      </p>
+      <p>
+        The solid was built in STAR-CCM+ 3D-CAD from the two splines, closed with straight end lines
+        and extruded 1 mm in Z, then collapsed by the 2D conversion. Surfaces were split by angle at
+        a 30 degree threshold, which leaves each wall as a single surface.
+      </p>
+      <p>
+        One inconsistency in the archive itself: <code>data.Mach46.txt</code> lists the throat height
+        as 0.14435 ft = 4.407 cm, where the correct conversion is 4.400 cm. A 0.16% discrepancy,
+        immaterial for x/h normalization, but the archive is not perfectly self-consistent.
+      </p>
+    </details>
 
     <h3>Boundary conditions</h3>
     <table>
