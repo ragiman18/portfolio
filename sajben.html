@@ -43,8 +43,7 @@
         <dt>Result</dt>
         <dd class="result">Grid-converged shock position <b>1.4230 x/h</b> with a numerical
             uncertainty of <b>0.22%</b>, against an experimental <b>1.280</b>. That is a
-            <b>+11.2% modeling error, roughly 51 times larger than the mesh uncertainty</b>.
-            Choice of turbulence model accounts for about half of it.</dd>
+            <b>+11.2% modeling error, roughly 51 times larger than the mesh uncertainty</b>.</dd>
       </dl>
     </div>
 
@@ -186,7 +185,7 @@
     </p>
     <p>
       The archive does not specify inlet turbulence quantities, so solver defaults were kept
-      (turbulence intensity 1%, turbulent viscosity ratio 10). 
+      (turbulence intensity 1%, turbulent viscosity ratio 10).
     </p>
 
     <h3>Mesh</h3>
@@ -536,7 +535,7 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
       <img src="images/gci_shock_position.png" alt="Shock position against representative cell size, with Richardson extrapolation and GCI band">
       <figcaption><b>Fig. 3.</b> Shock position against cell size. The three meshes converge along
         the fitted power law (p = 3.72) to 1.4230 x/h at zero cell size. The shaded band is the
-        0.220% GCI. The experimental value sits 11.2% below the converged result, 46 times the
+        0.220% GCI. The experimental value sits 11.2% below the converged result, 51 times the
         numerical uncertainty.</figcaption>
     </figure>
 
@@ -739,8 +738,7 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
     <p>
       SST's own shock sits 0.1405 h from the experimental position, and switching models moves it
       0.1416 h. Changing nothing but the turbulence model shifts the answer by as much as the entire
-      remaining error in the better of the two, which is where the estimate of about half comes
-      from.
+      remaining error in the better of the two.
     </p>
     <p>
       Upstream of the shock the two models give near-identical errors, 3.238% against 3.248% on the
@@ -763,7 +761,7 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
         (bottom). SA places the shock visibly further downstream. Both shocks run straight from wall
         to wall. The fine vertical banding just downstream of each shock is the odd-even decoupling
         noted in the assessment. Stair-stepping upstream of the shock is contour rendering across
-        cells, not flow structure. Color scale shared.</figcaption>
+        cells, not flow structure.</figcaption>
     </figure>
 
     <h3>Velocity profiles</h3>
@@ -804,56 +802,53 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
 
     <h2>Conclusion</h2>
     <p>
-      Numerical uncertainty was measured at 0.22%. The disagreement with experiment is 11.2% and it
-      grows with refinement, so it is modeling error rather than mesh error. Choice of turbulence
-      model accounts for roughly half of it. SST outperforms SA on wall pressure and dramatically at
-      the first measurement station, though SA is marginally better at the three downstream
-      stations.
+      Shock position converges to 1.4230 x/h with a numerical uncertainty of 0.22%, against an
+      experimental 1.280. The 11.2% disagreement is 51 times that uncertainty and grows with
+      refinement, so it is modeling error, not mesh error. The turbulence model is a large part of
+      it: switching from SA to SST moves the shock by 0.142 x/h, which removes half of SA's total
+      disagreement and is as large as SST's entire remaining error. Neither model reaches the experiment, so the
+      choice between them does not explain the error that is left. The 2D and steady assumptions are
+      the leading candidates. SA is also qualitatively wrong at the first
+      measurement station, predicting supersonic flow where the experiment is subsonic, though it is
+      marginally better at the three stations downstream.
     </p>
     <div class="assessment">
       <p>
-        <b>Steady RANS on a flow with known self-excited oscillations.</b> A deliberate modeling
-        choice. The coarse-mesh oscillation turned out to be a numerical artifact, eliminated by
-        refinement, so the steady assumption was not violated at the resolutions used.
+        <b>Steady RANS on a flow with known self-excited oscillations.</b> A deliberate choice. The
+        coarse-mesh oscillation turned out to be a numerical artifact, eliminated by refinement, so
+        the steady assumption held at the resolutions used.
       </p>
       <p>
-        <b>2D, no sidewall effects.</b> The archive itself attributes downstream velocity profile
-        disagreement to three dimensional effects.
-      </p>
-      <p>
-        <b>Uniform inflow with no incoming boundary layer.</b> Inherited from the case definition
-        rather than chosen, and a leading suspect for part of the shock offset.
+        <b>The blockage mechanism is inferred, not measured.</b> All experimental profiles sit
+        downstream of the shock, and both models are biased low there by 15 to 20 m/s, opposite in
+        sign to the upstream deficit the mechanism requires. The 2D assumption and the uniform
+        inflow both push the same way but cannot be separated from the turbulence model with the
+        available data.
       </p>
       <p>
         <b>The separation bubble is not grid-converged.</b> Its length oscillates across the family
-        (0.092, 0.112, 0.106 h) so no valid uncertainty exists, and it is reported as a range.
-        Separation onset is more stable, between 1.558 and 1.565 h, and can be reported with more
-        confidence.
+        (0.092, 0.112, 0.106 h) so no valid uncertainty exists and it is reported as a range.
+        Separation onset is more stable, between 1.558 and 1.565 h.
       </p>
       <p>
         <b>SA converges about five times worse than SST</b>, with medium-to-fine shock movement of
-        +0.0442 h against +0.0088 h. Only two SA meshes were run, so no SA uncertainty band exists,
-        and it is estimated at roughly 1% rather than SST's 0.22%. The model comparison survives
-        comfortably, but this should not be hidden.
+        +0.0442 h against +0.0088 h. Only two SA meshes were run, so SA has no uncertainty band and
+        is estimated at roughly 1% against SST's 0.22%. The model comparison survives that
+        comfortably.
       </p>
       <p>
         <b>Odd-even decoupling appears on the fine mesh.</b> Core velocity alternates between
-        adjacent cells at about 2% amplitude. It is absent on the medium mesh and appears with
-        refinement, as the numerical damping that suppressed it falls below what is needed. The
+        adjacent cells at about 2% amplitude, absent on the medium mesh and appearing with
+        refinement as the numerical damping that suppressed it falls below what is needed. The
         gradient limiter is active and correctly configured, and the oscillation sits below its
         activation threshold by design. Wall quantities and the shock position uncertainty are
         unaffected.
       </p>
       <p>
-        <b>The blockage mechanism is inferred, not measured</b>, because all experimental profiles
-        are downstream of the shock. Both models are also biased low downstream by 15 to 20 m/s,
-        opposite in sign to the upstream deficit the mechanism requires.
-      </p>
-      <p>
-        <b>The extrapolation method is formally invalid pointwise inside a discontinuity.</b> Shock
-        position is a feature location derived from the full wall distribution rather than a single
-        value inside the shock, and the asymptotic ratio of 1.006 confirms the power law holds. Peak
-        Mach in the field, a smooth-region quantity, is reported alongside as corroboration.
+        <b>The extrapolation is formally invalid pointwise inside a discontinuity.</b> Shock
+        position is a feature location from the full wall distribution rather than a single value
+        inside the shock, and R = 1.006 confirms the power law holds. Peak Mach in the field, a
+        smooth-region quantity, is reported alongside as corroboration.
       </p>
     </div>
   </main>
