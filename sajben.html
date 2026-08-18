@@ -453,8 +453,8 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
     </p>
     <p>
       <b>Shock position converges faster than theory predicts</b>, at p = 3.72. Above formal second
-      order sounds wrong, but it is known behavior for the location of a sharp feature: a captured
-      shock snaps toward its converged position faster than smooth-error theory expects. R = 1.006
+      order sounds wrong, but it is known behavior for the location of a sharp feature. A captured
+      shock moves toward its converged position faster than theory expects. R = 1.006
       confirms the extrapolation holds.
     </p>
     <p>
@@ -465,10 +465,6 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
     </p>
     <p>
       Observed order is a property of the quantity being measured, not just of the solver.
-    </p>
-    <p>
-      The general lesson is that observed order is a property of the quantity being measured, not
-      just of the solver.
     </p>
     <p>
       Inlet Mach across the family, since it is the setup check from earlier:
@@ -486,7 +482,7 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
       The coarse mesh is closest to the published value and the grid-converged value is furthest
       from it, so quoting the coarse number as the setup check would mean picking the best-looking
       result off the least trustworthy mesh. All four are small enough that the setup is verified
-      either way. The direction is what matters: refinement moves the solution away from the
+      either way. The direction is what matters. Refinement moves the solution away from the
       measured value here, as it does for shock position and for overall wall pressure RMS. Three
       independent quantities drifting the same way is what keeps the modeling-error conclusion from
       resting on shock position alone.
@@ -498,7 +494,7 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
       they are reported as ranges.
     </p>
 
-    <h3>The discontinuity caveat, and why the data resolves it</h3>
+    <h3>Where the extrapolation breaks down</h3>
     <p>
       NASA's guidance for this archive states that where shocks are present, the extrapolation is
       invalid in the region of the discontinuity itself, though it still applies to quantities
@@ -523,16 +519,22 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
     </table>
 
     <p>
-      The quantities that failed are the pointwise-at-the-shock values the caveat concerns, and the
+      The quantities that failed are the pointwise, at the shock values the caveat concerns, and the
       ones that converged are the ones it exempts. The limit was observed here, not assumed.
     </p>
     <p>
       Separation bubble length is the exception. It is also a feature measure and it also
-      oscillated, but the reason is likely simpler: the bubble is one to two cells long on every
+      oscillated, but the bubble is one to two cells long on every
       mesh in the family, so it is under-resolved rather than mathematically excluded.
     </p>
 
-    <div class="fig-placeholder">[ figure: shock position plotted against cell size for all three meshes, with the extrapolated value marked at zero cell size ]</div>
+    <figure>
+      <img src="images/gci_shock_position.png" alt="Shock position against representative cell size, with Richardson extrapolation and GCI band">
+      <figcaption><b>Fig. 3.</b> Shock position against cell size. The three meshes converge along
+        the fitted power law (p = 3.72) to 1.4230 x/h at zero cell size. The shaded band is the
+        0.220% GCI. The experimental value sits 11.2% below the converged result, 46 times the
+        numerical uncertainty.</figcaption>
+    </figure>
 
     <h2>Validation</h2>
 
