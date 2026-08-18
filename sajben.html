@@ -65,7 +65,9 @@
       increasing resolution shows how much the answer is still moving as the mesh improves, which
       puts a number on how much of the error the mesh is responsible for. If that number is small, a
       large remaining disagreement has to be coming from the model. This is standard practice in
-      industrial verification and validation, and it is the step most commonly skipped.
+      industrial verification and validation, and it is the step most commonly skipped. It also has to
+      come first, as you cannot claim RANS is wrong by 11% until you have shown the mesh error is much smaller
+      than 11%.
     </p>
 
     <h2>The case</h2>
@@ -343,11 +345,6 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
     </p>
 
     <h2>Verification</h2>
-    <p>
-      Verification comes first because you cannot claim RANS is wrong by 11% until you have shown
-      that mesh error is much smaller than 11%.
-    </p>
-
     <h3>Iterative convergence</h3>
     <p>
       Mass is conserved to 2.8 &times; 10<sup>-5</sup> % on the fine mesh with residuals flat, and
@@ -719,9 +716,8 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
 
     <h2>Turbulence model comparison</h2>
     <p>
-      Same mesh, same boundary conditions, same solver settings. The only thing changed between the
-      two runs is the turbulence model, switching from k-omega SST to Spalart-Allmaras. Inlet
-      turbulent viscosity ratio was matched at 10 for both.
+      The case was re-run on the same meshes with Spalart-Allmaras in place of k-omega SST.
+      Boundary conditions, solver settings, and inlet turbulent viscosity ratio were all unchanged.
     </p>
 
     <table>
@@ -729,68 +725,82 @@ RMS  = sqrt( (1/N) * sum( e_i^2 ) )</pre>
       <tbody>
         <tr><td>Shock position x/h, upper wall</td><td>1.4205</td><td>1.5621</td><td>1.280</td></tr>
         <tr><td>Shock position x/h, lower wall</td><td>1.4414</td><td>1.6176</td><td>1.271</td></tr>
+        <tr><td>Peak Mach ahead of the shock</td><td>1.252</td><td>1.280</td><td>&middot;</td></tr>
         <tr><td>Separation bubble length</td><td>0.106 h</td><td>0.295 h</td><td>&middot;</td></tr>
-        <tr class="highlight"><td>Core Mach at first profile station (x/h = 1.729)</td><td>0.905</td><td>1.278</td><td>0.924</td></tr>
         <tr><td>Wall pressure RMS, upper wall</td><td>4.86%</td><td>7.46%</td><td>&middot;</td></tr>
       </tbody>
     </table>
 
     <p>
-      SA places the shock 0.1416 h further downstream than SST, and the same gap appears on both the
-      medium and fine meshes (+0.1062 h and +0.1416 h). That is an order of magnitude larger than
-      the numerical uncertainty of either model, so the difference between them is real rather than
-      mesh noise.
+      SA places the shock 0.1416 h further downstream than SST, and the gap holds on both meshes
+      (+0.1062 h medium, +0.1416 h fine). That is an order of magnitude larger than either model's
+      numerical uncertainty, so the difference is real rather than mesh noise.
     </p>
     <p>
-      The size of that gap is the useful part. SST's own shock sits 0.1405 h away from the
-      experimental position, and switching turbulence models moves the shock by 0.1416 h, almost
-      exactly the same amount. Changing nothing but the turbulence model therefore shifts the answer
-      by as much as the entire remaining error in the better of the two models. That makes the
-      turbulence model responsible for roughly as much error as the other three assumptions
-      combined, which is where the estimate of about half comes from.
+      SST's own shock sits 0.1405 h from the experimental position, and switching models moves it
+      0.1416 h. Changing nothing but the turbulence model shifts the answer by as much as the entire
+      remaining error in the better of the two, which is where the estimate of about half comes
+      from.
     </p>
     <p>
-      An internal check supports the comparison. Upstream of the shock the two models give
-      essentially identical errors, 3.238% against 3.248% on the upper wall. That region is
-      dominated by inviscid behavior where the turbulence model should not matter much, and it does
-      not, which confirms the two runs really do differ only in the model.
+      Upstream of the shock the two models give near-identical errors, 3.238% against 3.248% on the
+      upper wall. That region is dominated by inviscid behavior where the turbulence model should
+      not matter much, and it does not, confirming the runs differ only in the model.
     </p>
     <p>
-      The separation result looks backwards at first. SA produces a bubble almost three times longer
-      than SST yet places the shock further downstream, when more separation should mean more
-      blockage and therefore an earlier shock. The resolution is the order in which things happen.
-      SA under-predicts boundary layer growth in the accelerating region ahead of the shock, because
-      it lacks the limiter SST applies to cap turbulent viscosity in adverse pressure gradients.
-      Less blockage before the shock means more effective area, so the flow keeps accelerating and
-      reaches a higher Mach number, 1.280 against SST's 1.252, before it shocks. A shock further
-      downstream at higher Mach is a stronger shock, and a stronger shock separates the boundary
-      layer more severely. The bigger bubble is the result of where the shock ended up, not the
-      cause of it.
+      The separation result looks backwards. SA produces a bubble three times longer than SST yet
+      places the shock further downstream, when more separation should mean more blockage and an
+      earlier shock. SA lacks the limiter SST applies to cap turbulent viscosity in adverse pressure
+      gradients, so it under-predicts boundary layer growth ahead of the shock. Less blockage means
+      more effective area, the flow accelerates further and reaches M = 1.280 against SST's 1.252,
+      and a stronger shock at that position separates the boundary layer more severely. The bubble
+      follows from where the shock ended up rather than causing it.
     </p>
-    <p>
-      The velocity profiles produced the more striking result. At the first station the experiment
-      and SST are both subsonic, at M = 0.924 and 0.905. <b>SA is still supersonic there, at
-      M = 1.278.</b> It is not simply less accurate at this station, it is qualitatively wrong,
-      predicting supersonic flow where the experiment measured subsonic.
-    </p>
-    <p>
-      That leads to the methodological point of the whole study. Wall pressure alone showed SA as
-      quantitatively worse. The second validation quantity showed it was structurally wrong.
-      Validating against one quantity is not validation.
-    </p>
-    <p>
-      Reported honestly, SA's failure is concentrated at that first station. At the three downstream
-      stations SA is marginally better than SST. The overall verdict that SST is the better model
-      holds on wall pressure and at the first station, but SA is not uniformly worse.
-    </p>
-
     <figure>
-      <img src="images/sajben_sst_vs_sa_zoom.png" alt="Zoomed Mach contours comparing SST and SA shock position">
-      <figcaption><b>Fig. 3.</b> Shock region for SST and SA at matched scale and camera. SA places
-        the shock visibly further downstream. Both shocks run straight from wall to wall.</figcaption>
+      <img src="images/sst_shock_zoom.png" alt="Mach contours in the shock region, SST">
+      <img src="images/sa_shock_zoom.png" alt="Mach contours in the shock region, SA, with color scale" style="margin-top:10px">
+      <figcaption><b>Fig. X.</b> Shock region at matched scale and camera, SST (top) and SA
+        (bottom). SA places the shock visibly further downstream. Both shocks run straight from wall
+        to wall. The fine vertical banding just downstream of each shock is the odd-even decoupling
+        noted in the assessment. Stair-stepping upstream of the shock is contour rendering across
+        cells, not flow structure. Color scale shared.</figcaption>
     </figure>
 
-    <div class="fig-placeholder">[ figure: velocity profile at the first station, SST vs SA vs experiment ]</div>
+    <h3>Velocity profiles</h3>
+    <table>
+      <thead><tr><th>Station x/h</th><th>SA RMS</th><th>SA bias</th><th>SST RMS</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td>1.729</td><td>32.6%</td><td>+55.2 m/s</td><td>17.2%</td></tr>
+        <tr><td>2.882</td><td>21.3%</td><td>&minus;18.6</td><td>21.9%</td></tr>
+        <tr><td>4.611</td><td>20.8%</td><td>&minus;18.3</td><td>24.1%</td></tr>
+        <tr><td>6.340</td><td>15.3%</td><td>&minus;15.0</td><td>18.8%</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      The first station is the result. Experiment and SST are both subsonic there, at M = 0.924 and
+      0.905. <b>SA is supersonic, at M = 1.278.</b> It is not less accurate at this station, it is
+      qualitatively wrong, predicting supersonic flow where the experiment measured subsonic. The
+      bias column shows the same thing: SA is the only entry in the table with the wrong sign.
+    </p>
+    <figure>
+      <img src="images/velocity_profiles_fine.png" alt="Velocity profiles at four stations, SST and SA against experiment">
+      <figcaption><b>Fig. X.</b> Velocity profiles at the four measurement stations, plotted from
+        the lower wall. At x/h = 1.729 SA carries a supersonic core at roughly 370 m/s where the
+        experiment and SST are both subsonic, with the shear layer above the separated region
+        sitting lower and sharper than SST's. At the three downstream stations the two models
+        collapse onto each other and both run slow. The cell-to-cell stepping in the SST core is
+        odd-even decoupling; see the assessment at the end.</figcaption>
+    </figure>
+    <p>
+      Wall pressure alone showed SA as quantitatively worse. The second validation quantity showed
+      it was structurally wrong. Validating against one quantity is not validation.
+    </p>
+    <p>
+      SA's failure is concentrated at that first station. At the other three it is marginally better
+      than SST. SST is the better model on wall pressure and at station 1, but SA is not uniformly
+      worse.
+    </p>
 
     <h2>Conclusion</h2>
     <p>
