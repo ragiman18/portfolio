@@ -195,44 +195,6 @@
       shrinking by exactly 1.5 between levels. Wall spacing targets y+ = 2 on the coarse mesh.
     </p>
     <details>
-      <summary>What these mesh quantities mean</summary>
-      <p>
-        <b>Streamwise &Delta;x</b> is the length of a cell along the flow direction. Smaller means
-        the shock is captured over a shorter distance and its position is pinned down more
-        precisely.
-      </p>
-      <p>
-        <b>First cell height</b> is the thickness of the very first cell against the wall, measured
-        perpendicular to it. Velocity changes extremely rapidly across the boundary layer, so this
-        cell has to be tiny to capture that gradient.
-      </p>
-      <p>
-        <b>y+</b> is a dimensionless measure of how far that first cell center sits from the wall,
-        scaled by the local friction at the wall. It tells you whether the near-wall mesh is fine
-        enough for the turbulence model. Below about 1, the model resolves the flow right down to
-        the wall. Above about 30, it uses a formula to bridge the gap instead. The range in between
-        is the worst place to be. All three meshes here sit below 1.
-      </p>
-      <p>
-        <b>Near-wall aspect ratio</b> is the streamwise cell length divided by the first cell
-        height, so it describes cell shape. A value of 1421 means these cells are long and thin,
-        which is normal for a boundary layer mesh, since the flow changes far faster perpendicular
-        to the wall than along it.
-      </p>
-    </details>
-
-    <table>
-      <thead>
-        <tr><th>Mesh</th><th>Cells</th><th>Streamwise &Delta;x</th><th>First cell height</th><th>Achieved y+</th><th>Near-wall aspect ratio</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Coarse</td><td>12,800</td><td>3.490 mm</td><td>2.456 um</td><td>0.998</td><td>1421</td></tr>
-        <tr><td>Medium</td><td>28,800</td><td>2.326 mm</td><td>1.637 um</td><td>0.866</td><td>1421</td></tr>
-        <tr><td>Fine</td><td>64,800</td><td>1.551 mm</td><td>1.092 um</td><td>0.933</td><td>1421</td></tr>
-      </tbody>
-    </table>
-
-    <details>
       <summary>How the first cell height was sized</summary>
       <p>
         Spacing came from the
@@ -258,6 +220,43 @@ tau_w = 0.5 Cf rho U^2      = 139.3 Pa
 u_tau = sqrt(tau_w / rho)   = 11.39 m/s
 dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
       <p>Medium and fine divide this by 1.5 per level: 1.637 um and 1.092 um.</p>
+    </details>
+    <table>
+      <thead>
+        <tr><th>Mesh</th><th>Cells</th><th>Streamwise &Delta;x</th><th>First cell height</th><th>Achieved y+</th><th>Near-wall aspect ratio</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Coarse</td><td>12,800</td><td>3.490 mm</td><td>2.456 um</td><td>0.998</td><td>1421</td></tr>
+        <tr><td>Medium</td><td>28,800</td><td>2.326 mm</td><td>1.637 um</td><td>0.866</td><td>1421</td></tr>
+        <tr><td>Fine</td><td>64,800</td><td>1.551 mm</td><td>1.092 um</td><td>0.933</td><td>1421</td></tr>
+      </tbody>
+    </table>
+
+    <details>
+      <summary>What these mesh quantities mean</summary>
+      <p>
+        <b>Streamwise &Delta;x</b> is the length of a cell along the flow direction. Smaller means
+        the shock is captured over a shorter distance and its position is pinned down more
+        precisely.
+      </p>
+      <p>
+        <b>First cell height</b> is the thickness of the very first cell against the wall, measured
+        perpendicular to it. Velocity changes extremely rapidly across the boundary layer, so this
+        cell has to be tiny to capture that gradient.
+      </p>
+      <p>
+        <b>y+</b> is a dimensionless measure of how far that first cell center sits from the wall,
+        scaled by the local friction at the wall. It tells you whether the near-wall mesh is fine
+        enough for the turbulence model. Below about 1, the model resolves the flow right down to
+        the wall. Above about 30, it uses a formula to bridge the gap instead. The range in between
+        is the worst place to be. All three meshes here sit below 1.
+      </p>
+      <p>
+        <b>Near-wall aspect ratio</b> is the streamwise cell length divided by the first cell
+        height, so it describes cell shape. A value of 1421 means these cells are long and thin,
+        which is normal for a boundary layer mesh, since the flow changes far faster perpendicular
+        to the wall than along it.
+      </p>
     </details>
 
     <p>
