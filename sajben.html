@@ -195,9 +195,8 @@
       shrinking by exactly 1.5 between levels.
     </p>
     <p>
-      Cell height at the wall was sized using a flat-plate skin friction correlation evaluated at
-      throat conditions, where wall shear is highest, targeting y+ = 2 on the coarse mesh. Sizing
-      at the throat makes every other part of the duct better resolved than required.
+      Structured mesh built with STAR-CCM+ Directed Mesh, three levels, with every cell dimension
+      shrinking by exactly 1.5 between levels. Wall spacing targets y+ = 2 on the coarse mesh.
     </p>
 
     <table>
@@ -212,46 +211,51 @@
     </table>
 
     <details>
-      <summary>What these mesh quantities mean</summary>
+      <summary>How the first cell height was sized</summary>
       <p>
-        <b>Streamwise &Delta;x</b> is the length of a cell along the flow direction. Smaller means
-        the shock is captured over a shorter distance and its position is pinned down more
-        precisely.
+        The spacing came from the
+        <a href="https://www.cfd-online.com/Tools/yplus.php">CFD-Online y+ calculator</a>, which
+        needs local flow conditions as input. The archive only gives stagnation conditions, so
+        those had to be converted to conditions at the throat first. The duct is choked, so the
+        throat sits at M = 1, and the isentropic relations give:
+      </p>
+      <table>
+        <thead><tr><th>Quantity</th><th>Value at throat</th></tr></thead>
+        <tbody>
+          <tr><td>Density</td><td>1.073 kg/m<sup>3</sup></td></tr>
+          <tr><td>Core velocity</td><td>305.0 m/s</td></tr>
+          <tr><td>Dynamic viscosity</td><td>1.502 &times; 10<sup>-5</sup> Pa&middot;s</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The throat was chosen because wall shear is highest there, and a single first cell height
+        is used along the whole wall, so sizing for the worst case leaves everywhere else better
+        resolved than required. The boundary layer grows from the inlet to the throat, a run of
+        7 in (0.1778 m), which is the length the calculator needs.
       </p>
       <p>
-        <b>First cell height</b> is the thickness of the very first cell sitting against the wall,
-        measured perpendicular to it. Velocity changes extremely rapidly across the boundary layer,
-        so this cell has to be tiny to capture that gradient.
+        Feeding those four numbers in with a target of y+ = 2 returns Re = 3.9 &times;
+        10<sup>6</sup> and a wall distance of <b>2.456 um</b>. Internally the calculator estimates
+        skin friction from a flat-plate correlation, converts that to wall shear and a friction
+        velocity, and inverts the definition of y+ to get the spacing. The medium and fine meshes
+        divide this by 1.5 per level.
       </p>
       <p>
-        <b>y+</b> is a dimensionless measure of how far that first cell center sits from the wall,
-        scaled by the local friction at the wall. It tells you whether the near-wall mesh is fine
-        enough for the turbulence model. Below about 1, the model resolves the flow right down to
-        the wall. Above about 30, it uses a formula to bridge the gap instead. The range in between
-        is the worst place to be. All three meshes here sit below 1.
+        The estimate came out about twice as conservative as needed, giving an achieved y+ near 1
+        rather than 2. The correlation evaluates wall shear using the throat velocity while
+        treating the boundary layer as though it grew at that speed the whole way, when the flow
+        actually accelerates from roughly 150 m/s at the inlet to 305 m/s at the throat. That
+        alone accounts for the factor. All three meshes are wall-resolved either way, and since
+        every mesh shifts by the same amount, the family stays self-similar.
       </p>
       <p>
-        <b>Near-wall aspect ratio</b> is the streamwise cell length divided by the first cell
-        height, so it describes cell shape. A value of 1421 means these cells are long and thin,
-        which is normal for a boundary layer mesh, since the flow changes far faster perpendicular
-        to the wall than along it.
+        Achieved y+ also does not fall steadily across the family (0.998, 0.866, 0.933) even
+        though the cells shrink every time. y+ depends on computed wall friction as well as
+        spacing, and better boundary layer resolution produces higher computed friction, which
+        largely cancels the finer cells. First cell height is the design input; y+ is the measured
+        outcome.
       </p>
     </details>
-
-    <p>
-      The near-wall aspect ratio being identical on all three meshes is the useful number here. It
-      shows the three meshes are genuinely the same mesh at different scales rather than three
-      different meshes, because cell shape is preserved and only cell size changes. That is the
-      condition the grid convergence method requires, and most studies assert it without
-      demonstrating it.
-    </p>
-    <p>
-      Worth noting that y+ does not fall steadily across the family (0.998, 0.866, 0.933) even
-      though the cells get smaller every time. y+ depends on the computed wall friction as well as
-      the cell size, and better boundary layer resolution produces higher computed friction, which
-      partly cancels the effect of the finer cells. All three meshes are wall-resolved regardless.
-    </p>
-
     <details>
       <summary>Why structured, and why refine by 1.5 rather than the more common root-2</summary>
       <p>
