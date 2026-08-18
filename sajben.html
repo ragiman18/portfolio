@@ -119,12 +119,12 @@
     <p>
       The archive provides each wall as 81 coordinate points. Joining those points with straight
       lines leaves the wall kinked rather than smooth, and in the tightest part of the contraction
-      that faceted wall sits up to 350 &mum from where a smooth curve would run, around 300 times the
+      that faceted wall sits up to 350 um from where a smooth curve would run, around 300 times the
       height of the smallest cell in the mesh. Every kink would act as a small artificial
       disturbance in exactly the boundary layer the mesh was built to resolve, so both walls were
       resampled onto a cubic spline before meshing. The resampled geometry matches the archive's
       quoted throat height and exit-to-throat area ratio to within 0.001%. An assumption worth stating
-      is the spline reconstructs the wall between NASA's points, and the original tunnel
+      is that the spline reconstructs the wall between NASA's points, since the original tunnel
       contour is not available.
     </p>
     <details>
@@ -152,9 +152,9 @@
         a 30 degree threshold, which leaves each wall as a single surface.
       </p>
       <p>
-        One inconsistency in the archive itself: <code>data.Mach46.txt</code> lists the throat height
+        One inconsistency in the archive itself is <code>data.Mach46.txt</code> lists the throat height
         as 0.14435 ft = 4.407 cm, where the correct conversion is 4.400 cm. A 0.16% discrepancy,
-        immaterial for x/h normalization, but the archive is not perfectly self-consistent.
+        negligible for x/h normalization, but the archive is not perfectly self-consistent.
       </p>
     </details>
 
@@ -168,24 +168,25 @@
       </tbody>
     </table>
     <p>
-      The inflow is subsonic, so conditions at the inlet are not fixed by what is upstream alone.
-      Pressure information travels back up the duct from downstream and affects the inlet as well.
-      A stagnation inlet handles this correctly by imposing stagnation pressure and temperature and
-      letting the solver work out the velocity from the interior solution, which is what a flow fed
-      from a reservoir actually does. A velocity inlet would instead force the velocity to a chosen
-      value, which means fixing the answer rather than predicting it.
+      The inflow is subsonic, so conditions at the inlet are not fixed by what is upstream alone:
+      pressure information travels back up the duct from downstream. A stagnation inlet handles that
+      correctly by imposing stagnation pressure and temperature and letting the solver work out the
+      velocity from the interior solution, which is what a flow fed from a reservoir actually does.
+      A velocity inlet would force the velocity to a chosen value, fixing the answer rather than
+      predicting it.
     </p>
     <p>
-      That choice provides a free check on the whole setup. No Mach number was imposed anywhere,
-      yet the solution settled at an inlet Mach of <b>0.46005</b> against the published 0.46, an
-      error of 0.01%. For that to happen, the geometry, the boundary conditions, and the gas model
-      all have to be consistent with each other. A geometry error, a unit error, or a wrong
-      reference pressure would show up here.
+      That gives a free check on the whole setup. No Mach number was imposed anywhere, yet the
+      solution settled at an inlet Mach of <b>0.45971</b> on the fine mesh, a 0.063% error against
+      the published 0.46. A geometry error, a unit error, or a wrong reference pressure would all
+      show up here. The value drifts slightly further from 0.46 as the mesh refines, in the same
+      direction as everything else in this study, and the by-mesh numbers are in the verification
+      section.
     </p>
     <p>
-      A second assumption: the archive does not specify inlet turbulence quantities, so solver
-      defaults were kept (turbulence intensity 1%, turbulent viscosity ratio 10). Keeping the
-      default is easier to defend than a hand-picked value when nothing is sourced.
+      The archive does not specify inlet turbulence quantities, so solver defaults were kept
+      (turbulence intensity 1%, turbulent viscosity ratio 10). Keeping the default is easier to
+      defend than a hand-picked value when nothing is sourced.
     </p>
 
     <h3>Mesh</h3>
@@ -274,7 +275,7 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
       grid convergence method requires, and most studies assert it without demonstrating it.
     </p>
 
-  <details>
+    <details>
       <summary>Why structured, and why refine by 1.5 rather than the more common root-2</summary>
       <p>
         <b>Structured</b> because the grid convergence method requires geometrically similar meshes
@@ -291,7 +292,7 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
         exactly 1.5 every time, and the wider spacing between meshes gives a cleaner signal against
         iterative noise.
       </p>
-  </details>
+    </details>
     
     <h3>Solver</h3>
     <p>
@@ -338,7 +339,8 @@ dy1   = y+ mu / (rho u_tau) = 2.456 um</pre>
 
     <h2>Verification</h2>
     <p>
-      This section comes before validation, and the ordering is the point.
+      Verification comes first because you cannot claim RANS is wrong by 11% until you have shown
+      that mesh error is much smaller than 11%.
     </p>
 
     <h3>Iterative convergence</h3>
@@ -479,6 +481,28 @@ GCI       = 1.25 * (0.0088/1.4205)/3.5193 = 0.00220 = 0.220%</pre>
     <p>
       The general lesson is that observed order is a property of the quantity being measured, not
       just of the solver.
+    </p>
+    <p>
+      Inlet Mach is worth showing across the family, because it is the setup check from earlier and
+      it does not improve with refinement.
+    </p>
+    <table>
+      <thead><tr><th>Mesh</th><th>Inlet Mach</th><th>Error vs published 0.46</th></tr></thead>
+      <tbody>
+        <tr><td>Coarse</td><td>0.4600464</td><td>+0.010%</td></tr>
+        <tr><td>Medium</td><td>0.4598625</td><td>&minus;0.030%</td></tr>
+        <tr><td>Fine</td><td>0.4597114</td><td>&minus;0.063%</td></tr>
+        <tr class="highlight"><td>Extrapolated</td><td>0.45902</td><td>&minus;0.213%</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The coarse mesh is the closest to the published value and the grid-converged value is the
+      furthest from it, so quoting the coarse number as the setup check would be picking the
+      best-looking result off the least trustworthy mesh. All four are small enough that the setup
+      is verified either way. The direction matters more than the size: refinement moves the
+      solution slightly away from the measured value here, exactly as it does for shock position and
+      for overall wall pressure RMS. Three independent quantities drifting the same way is what
+      makes the modeling-error conclusion hold together rather than resting on shock position alone.
     </p>
     <p>
       Three further quantities failed to converge at all: minimum wall pressure, peak isentropic
